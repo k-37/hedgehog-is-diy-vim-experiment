@@ -1,0 +1,816 @@
+" ==============
+" Initialization
+" ==============
+
+" Skip initialization for `vim-tiny` or `vim-small`.
+if !1 | finish | endif
+
+if &compatible | set nocompatible | endif
+
+scriptencoding utf-8
+set encoding=utf-8
+
+" Path is hardcoded because Neovim uses the same configuration.
+let $VIM_CONFIG_PATH=system('echo -n "${HOME}/.vim/vimrc"')
+
+" =========
+" Functions
+" =========
+
+function <SID>StripTrailingWhitespaces() abort
+    let l:l = line(".")
+    let l:c = col(".")
+    keepp %s/\s\+$//e
+    call cursor(l, c)
+endfunction
+
+" Paste
+" =====
+
+" In Normal mode it is not possible to place cursor after the last character, and
+" that is possible in Insert mode.
+function <SID>PasteInNormalMode() abort
+    let l:cursor_column = col(".")
+    let l:last_column_of_a_row = col("$") - 1
+    if l:cursor_column >= l:last_column_of_a_row
+        execute 'normal p'
+    else
+        execute 'normal P'
+    endif
+endfunction
+
+function <SID>PasteInInsertMode() abort
+    let l:cursor_column = col(".")
+    let l:end_of_the_cursor_line = col("$")
+    if l:cursor_column == l:end_of_the_cursor_line
+        " `<C-O>` exits Insert mode and executes one command in Normal mode before
+        " returning to Insert mode (`:h i_CTRL-O`).
+        return "\<C-O>\p"
+    else
+        return "\<C-O>\P"
+    endif
+endfunction
+
+" Color scheme
+" ============
+
+function <SID>LoadColorScheme() abort
+    " Set color scheme which is good for 'black on white' and 'white on black' terminals.
+    set background=dark
+    silent! colorscheme desert
+
+    set cursorline " Highlight the screen line of the cursor (local to window).
+    highlight CursorLine term=NONE cterm=NONE gui=NONE ctermbg=08
+    " Highlight line number of the current line.
+    highlight CursorLineNr term=bold cterm=bold gui=bold ctermbg=89 guibg=#87005f
+
+    " Configure normal text (default background color).
+    highlight Normal term=NONE cterm=NONE gui=NONE
+        \ ctermfg=15 ctermbg=236 guifg=#FFFFFF guibg=#303030
+
+    " Configure white spaces.
+    highlight Whitespace term=NONE cterm=NONE gui=NONE ctermfg=75 guifg=#71716b
+
+    if has("autocmd")
+        augroup CursorLine
+            " Remove all autocommands for the current group.
+            autocmd!
+
+            " Highlight current line on entering Insert mode.
+            autocmd InsertEnter * highlight CursorLine term=NONE cterm=NONE gui=NONE
+                \ ctermbg=89 guibg=#87005f
+            autocmd InsertEnter * set timeoutlen=0
+            autocmd InsertLeave * highlight CursorLine term=NONE cterm=NONE gui=NONE
+                \ ctermbg=08 guibg=#666666
+            autocmd InsertLeave * execute "set timeoutlen=".s:default_timeoutlen
+        augroup END
+    endif
+
+    call <SID>SetTablineAndStatusLine()
+endfunction
+
+function <SID>SetTablineAndStatusLine() abort
+    " Tab line.
+    highlight TabLine guifg=#FFFFFF guibg=#000000 gui=NONE ctermfg=15 ctermbg=0 cterm=NONE
+    highlight TabLineSel guifg=#000000 guibg=#FFFFFF ctermfg=0 ctermbg=15
+
+    " Status line.
+    highlight StatusLine guifg=#000000 guibg=#FFFFFF cterm=NONE ctermfg=0 ctermbg=15
+    highlight StatusLineNC guifg=#FFFFFF guibg=#000000 cterm=NONE ctermfg=15 ctermbg=0
+
+    " Status line Insert.
+    highlight User1 guifg=#010101 guibg=#FFFF00 cterm=NONE ctermfg=16 ctermbg=11
+
+    " Status line Visual.
+    highlight User2 guifg=#010101 guibg=#00FF00 ctermfg=16 ctermbg=10
+
+    " Status line Replace/Virtual replace.
+    highlight User3 guifg=#010101 guibg=#FF00FF cterm=NONE ctermfg=16 ctermbg=13
+
+    set showtabline=2 " Always show tab pages line.
+    set laststatus=2 " Always show status line.
+
+    " Alternate format to be used for a status line.
+    set statusline=%!SetStatusLine()
+
+    let s:statusLine = ''
+    let s:statusLine .= '%m'
+    let s:statusLine .= '%r'
+    let s:statusLine .= '%h'
+    let s:statusLine .= '%w'
+    let s:statusLine .= ' %F'
+    let s:statusLine .= '%='
+    let s:statusLine .= ' %y'
+    let s:statusLine .= ' %{&fileformat}'
+    let s:statusLine .= ' %{&fileencoding}'
+    let s:statusLine .= ' | %b = %B'
+    let s:statusLine .= ' | %l/%L:%c'
+    let s:statusLine .= ' | %P'
+
+    function! SetStatusLine() abort
+        if mode() == 'i'
+            " Sets User1 highlight group.
+            return '%1*'.s:statusLine
+        elseif mode() == 'v' || mode() == "\<C-V>"
+            return '%2*'.s:statusLine
+        elseif mode() == 'R' || mode() == 'Rv'
+            return '%3*'.s:statusLine
+        endif
+        " Sets StatusLine highlight group.
+        return '%0*'.s:statusLine
+    endfunction
+endfunction
+
+" Netrw
+" =====
+
+function <SID>SearchNetrw(fname) abort
+    if ! search('\V\^' . a:fname . '\$')
+        call search('^' . substitute(a:fname, '\w\zs.*', '', '') . '.*\/\@<!$')
+    endif
+endfunction
+
+" Fuzzy find with `fzf` command
+" =============================
+
+let g:custom_fzf_command_options = '--expect=ctrl-t,ctrl-x,ctrl-v --reverse --multi'
+
+function <SID>FZF() abort
+    if has('nvim')
+        execute 'FZF ' . g:custom_fzf_command_options
+    else
+        let l:tempname = tempname()
+        execute 'silent !fzf ' g:custom_fzf_command_options
+        \    . ' | awk ''{ print $1":1:0" }'' > ' . fnameescape(l:tempname)
+        try
+            execute 'cfile ' . l:tempname
+            redraw!
+        finally
+            call delete(l:tempname)
+        endtry
+    endif
+endfunction
+
+function <SID>RG(args) abort
+    let l:searchcommand = 'rg --vimgrep --hidden --smart-case -- '
+    let l:pattern = '.'
+    if len(a:args) > 0
+        let l:pattern = a:args
+    endif
+    if has('nvim')
+        call fzf#run(fzf#wrap({
+        \   'source': l:searchcommand . fzf#shellescape(l:pattern),
+        \   'sinklist': function('s:RgHandler'),
+        \   'options': g:custom_fzf_command_options
+        \}))
+    else
+        let l:tempname = tempname()
+        execute 'silent !' . l:searchcommand . '''' . l:pattern . ''''
+        \    . ' | fzf ' . g:custom_fzf_command_options . ' > ' . fnameescape(l:tempname)
+        try
+            execute 'cfile ' . l:tempname
+            redraw!
+        finally
+            call delete(l:tempname)
+        endtry
+    endif
+endfunction
+
+function! s:RgReturnSplit(line) abort
+    " `rg` command returns:
+    " <file_name>:<line_number>:<column>:<context>
+    let parts = split(a:line, ':')
+    return {
+    \    'filename': parts[0],
+    \    'lnum': parts[1],
+    \    'col': parts[2],
+    \    'text': join(parts[3:], ':')
+    \}
+endfunction
+
+function! s:RgHandler(lines) abort
+    " First line is reserved for command e.g. `ctrl-t`.
+    if len(a:lines) < 2 | return | endif
+
+    let cmd = get({'ctrl-x': 'split',
+                 \ 'ctrl-v': 'vertical split',
+                 \ 'ctrl-t': '$tabe'}, a:lines[0], 'edit')
+    let list = map(a:lines[1:], 's:RgReturnSplit(v:val)')
+
+    for item in list
+        execute cmd escape(item.filename, ' %#\')
+        execute item.lnum
+        execute 'normal!' item.col.'|zz'
+    endfor
+endfunction
+
+" ===========
+" Autocommand
+" ===========
+
+if has("autocmd")
+    if has('nvim')
+        " Start terminal in Insert mode.
+        autocmd TermOpen * startinsert
+    endif
+
+    augroup vimrcEx
+        " Remove all autocommands for the current group.
+        autocmd!
+
+        autocmd VimEnter * call <SID>LoadColorScheme()
+
+        " Automatically reload config when modified.
+        if has('nvim')
+            autocmd BufWritePost $MYVIMRC,$VIM_CONFIG_PATH source $MYVIMRC
+                \ | call <SID>LoadColorScheme()
+        else
+            autocmd BufWritePost $MYVIMRC source $MYVIMRC | call <SID>LoadColorScheme()
+        endif
+
+        " Strip trailing whitespace on save for all files.
+        " For only some file types use:
+        " autocmd FileType c,cpp,java,php,ruby,python autocmd BufWritePre <buffer>
+        "     \ :call <SID>StripTrailingWhitespaces()
+        autocmd BufWritePre * call <SID>StripTrailingWhitespaces()
+    augroup END
+
+    augroup netrw
+        " Remove all autocommands for the current group.
+        autocmd!
+
+        " Focus previous active file in Netrw buffer when switching to it with `:Explore`.
+        " We redefine `:Explore` command, and use `expand('%:t')` to get name
+        " of current file.
+        " `autocmd VimEnter` is needed, because the Netrw plugin is sourced
+        " after `vimrc` has been loaded and otherwise this command would be
+        " overwritten using the default definition.
+        autocmd VimEnter * com! -nargs=* -bar -bang -count=0 -complete=dir Explore
+            \ execute "call netrw#Explore(<count>,0,0+<bang>0,<q-args>)"
+            \ . ' | call <SID>SearchNetrw(' . string(expand('%:t')) . ')'
+    augroup END
+
+    augroup netrw_mapping
+        " Remove all autocommands for the current group.
+        autocmd!
+
+        " Go up a directory.
+        autocmd FileType netrw nmap <buffer> h -
+        autocmd FileType netrw nmap <buffer> <left> -
+
+        " Open directory or a file.
+        autocmd FileType netrw nmap <buffer> l <CR>
+        autocmd FileType netrw nmap <buffer> <right> <CR>
+
+        " Go back in history.
+        autocmd FileType netrw nmap <buffer> H u
+
+        " Toggle the dotfiles.
+        autocmd FileType netrw nmap <buffer> . gh
+
+        " Close the preview window which was oppened with `p`.
+        autocmd FileType netrw nmap <buffer> P <C-W>z
+
+        " Create a file.
+        autocmd FileType netrw nmap <buffer> fc %:w<CR>
+
+        " Rename a file.
+        autocmd FileType netrw nmap <buffer> fr R
+
+        " Delete a file.
+        autocmd FileType netrw nmap <buffer> fd D
+    augroup END
+endif
+
+" =============
+" Configuration
+" =============
+
+" Commands
+" ========
+
+" Enable file type detection.
+" Enable loading the plugin files for specific file types.
+" Enable loading the indent file for specific file types.
+filetype plugin indent on
+
+syntax on " Switch syntax highlighting on.
+
+" Definitions
+" -----------
+
+" Shows differences between the current buffer and the file it was loaded from,
+" i.e. it shows unsaved changes, see `:h :DiffOrig`.
+command! DiffOrig aboveleft vnew | set buftype=nofile | read ++edit #
+    \ | 0d_ | diffthis | wincmd p | diffthis
+
+" Executes system `ctags` command which recursively generates tags from current dir.
+" Sending `stdout` and `stderr` to `/dev/null` prevents output from appearing in the buffer
+" and stopping tag generation on warnings.
+command! MakeTags silent !ctags -f .tags -R . &>/dev/null &
+
+command! -nargs=* Files call <SID>FZF()
+
+" Call as `:Rg <pattern>`.
+command! -nargs=* Rg call <SID>RG(<q-args>)
+
+" It works by adding random number and space to start of the line, sorting by number,
+" and removing what was added.
+command! -range=% -nargs=0 -bar Shuffle :silent!
+    \ <line1>,<line2>s/^/\=reltimestr(reltime())[-1:] . " "/
+    \ |<line1>,<line2>sort n
+    \ |<line1>,<line2>s/^\S* //
+    \ |nohlsearch
+
+" Key mappings
+" ============
+
+" Leader
+" ------
+
+" Namespace for user mappings.
+" To define a mapping which uses the `mapleader` variable, the special string
+" `<Leader>` can be used. It is replaced with the string value of `mapleader`.
+let mapleader="\<Space>"
+let maplocalleader=','
+
+" Custom
+" ------
+
+" Show unsaved changes in new tab and move the tab before the origin one.
+" Closing tab with diff will return focus to origin tab.
+nnoremap <F5> :tabnew %<CR>:DiffOrig<CR>:-tabmove<CR>
+
+" Create tags.
+nnoremap <Leader>mm :MakeTags<CR>
+
+" Clipboard
+" ---------
+
+" Copy.
+nnoremap <C-Insert> y
+vnoremap <C-Insert> y
+
+" Paste.
+vnoremap <S-Insert> p
+
+" It is not possible to paste before last character,
+" in Normal mode use `p` or `P` to do that.
+nnoremap <S-Insert> :call <SID>PasteInNormalMode()<CR>
+
+" We use `<C-R>` and call the function to get Insert mode cursor position
+" without switching to Normal mode, see `:help i_CTRL-R`.
+inoremap <S-Insert> <C-R>=<SID>PasteInInsertMode()<CR>
+
+" Paste clipboard register to command line.
+cnoremap <S-Insert> <C-R>*
+
+if has('nvim')
+    " Paste to terminal window like one used by `fzf`.
+    " `<C-\><C-N>` enters Normal mode in terminal.
+    tnoremap <expr> <S-Insert> '<C-\><C-N>pi'
+endif
+
+" Find
+" ----
+
+" Fuzzy find files.
+nnoremap <Leader>ff :Files<CR>
+
+" Find file and open in new tab. Hit <Tab> after entering search term.
+nnoremap <Leader>fe :tabfind *
+
+" Find file and open in the current tab. Hit <Tab> after entering search term.
+nnoremap <Leader>fx :find *
+
+" Find string in files. After entering pattern hit enter.
+nnoremap <Leader>fs :Rg<Space>
+
+" Buffers
+" -------
+
+" List buffers which then can be opened with `:b <BUFFER_NUMBER>`.
+nnoremap <Leader>bl :buffers<CR>
+
+" Tabs
+" ----
+
+" List tabs which then can be opened with `<TAB_NUMBER>gt`.
+nnoremap <Leader>tl :tabs<CR>
+
+" Switch to tab.
+nnoremap <M-1> :tabnext 1<CR>
+nnoremap <M-2> :tabnext 2<CR>
+nnoremap <M-3> :tabnext 3<CR>
+nnoremap <M-4> :tabnext 4<CR>
+nnoremap <M-5> :tabnext 5<CR>
+nnoremap <M-6> :tabnext 6<CR>
+nnoremap <M-7> :tabnext 7<CR>
+nnoremap <M-8> :tabnext 8<CR>
+nnoremap <M-9> :tabnext 9<CR>
+nnoremap <M-0> :tabnext 10<CR>
+
+" Open tab at the end.
+nnoremap <Leader>tt :$tabnew<CR>
+
+" Open tab next to current tab.
+nnoremap <Leader>tn :tabnew<CR>
+
+" Close tab.
+nnoremap <Leader>tc :tabclose<CR>
+nnoremap <C-F4> :tabclose<CR>
+
+" Move between tabs.
+nnoremap <M-h> gT
+nnoremap <M-l> gt
+
+" Move tabs.
+nnoremap <C-S-PageUp> :-tabmove<CR>
+nnoremap <M-S-h> :-tabmove<CR>
+nnoremap <C-S-PageDown> :+tabmove<CR>
+nnoremap <M-S-l> :+tabmove<CR>
+
+" Tags
+" ----
+
+" Jump to tag under cursor.
+nnoremap <C-5> <C-]>
+
+" Jump to ambiguous tag under cursor.
+nnoremap <Leader>jt g<C-]>
+
+" Jump to ambiguous tag under cursor after splitting window horizontally.
+nnoremap <Leader>js <C-w>sg<C-]>
+
+" Jump to ambiguous tag under cursor after splitting window vertically.
+nnoremap <Leader>jv <C-w>vg<C-]>
+
+" Panes (windows)
+" ---------------
+
+" Change panes (windows).
+nnoremap <C-l> <C-w>l
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+
+" Resize panes (windows).
+nnoremap <C-S-l> 4<C-w><
+nnoremap <C-S-h> 4<C-w>>
+nnoremap <C-S-j> 4<C-w>-
+nnoremap <C-S-k> 4<C-w>+
+
+" Lines
+" -----
+
+" Move lines.
+" `==` re-indents the line to suit its new position.
+nnoremap <C-M-j> :move .+1<CR>==
+nnoremap <C-M-k> :move .-2<CR>==
+inoremap <C-M-j> <Esc>:move .+1<CR>==gi
+inoremap <C-M-k> <Esc>:move .-2<CR>==gi
+vnoremap <C-M-j> :move '>+1<CR>gv=gv
+vnoremap <C-M-k> :move '<-2<CR>gv=gv
+
+" Move inside of displayed (word wraped) line.
+nnoremap j gj
+nnoremap k gk
+nnoremap gj j
+nnoremap gk k
+
+" Macros
+" ------
+
+" Apply macro which was recorded with `qq`.
+nnoremap <F4> @q
+
+" Apply macro to visual selection.
+vnoremap <F4> :normal! @q<CR>
+
+" Search and replace
+" ------------------
+
+" Search selection, `:help :s`.
+" We use replace which can define custom delimiter e.g. `;` (`:h E146`). `g` in `gn` replaces
+" all occurences in the line, `n` reports number of matches without doing substituton.
+" `<C-R>"` pastes contents of the `"` register which was filled with yank `y`.
+vnoremap <F3> y<BS>:%s;<C-R>";;gn<CR>n
+
+" Move cursor on top of a word or select some text, press defined combination, type changes,
+" exit Insert mode. Now press `.` to repeat changes to the next match, or
+" first use `n` to select next match before pressing `.` (comparable to multiple cursors).
+" `@/` is the last search pattern register, `:help quote/`.
+" `<cword>` captures word under cursor to `@/`.
+" `cgn` replaces next search hit, `c` is for change,
+" `gn` searches forward for the last used pattern.
+nnoremap <M-F2> :let @/='\<'.expand('<cword>').'\>'<CR>cgn
+xnoremap <M-F2> "sy:let @/=@s<CR>cgn
+
+" Search and replace selection below cursor.
+" `.,$s` is range setting.
+" `I` is for case sensitive, replace it with `i` for case insensitive.
+vnoremap <F2> y<BS>:.,$s;<C-R>";<C-R>";gcI<Left><Left><Left><Left>
+
+" Search and replace selection in whole file.
+" `%s` is range setting.
+" `I` is for case sensitive, replace it with `i` for case insensitive.
+vnoremap <S-F2> y<BS>:%s;<C-R>";<C-R>";gcI<Left><Left><Left><Left>
+
+" Sort
+" ----
+
+" Sort selection.
+" Because correct ordering by case is important we first use case sensitive sorting.
+" `i` is for case insensitive.
+" It is recommended not to use `\|` to chain commands in map.
+" `<CR>`, without padding with spaces, should be used instead,
+" see `:h map_bar` and `:h map_return`.
+vnoremap <F9> :sort<CR>:normal gv<CR>:sort i<CR>
+
+" Sort selection and reverse results.
+" `:global/^/move 0` is used to reverse sort results.
+vnoremap <S-F9> :sort<CR>:normal gv<CR>:sort i<CR>
+    \:normal gv<CR>:global/^/move 0<CR>:nohlsearch<CR>
+
+" Shuffle selected lines.
+vnoremap <C-F9>s :Shuffle<CR>
+
+" Remove duplicate lines.
+" `u` is for unique.
+vnoremap <C-F9>u :sort u<CR>
+
+" Numerical sorting.
+" `n` sorting is done on the first decimal number in the line.
+" One leading '-' is included in the number for signed numbers.
+vnoremap <C-F9>n :sort n<CR>
+
+" Matching brace and qoute
+" ------------------------
+
+" `<C-G> U` preserves undo sequence (`:h i_CTRL-G_U`).
+inoremap { {}<C-G>U<Left>
+inoremap ( ()<C-G>U<Left>
+inoremap [ []<C-G>U<Left>
+inoremap < <><C-G>U<Left>
+inoremap " ""<C-G>U<Left>
+inoremap ' ''<C-G>U<Left>
+inoremap ` ``<C-G>U<Left>
+
+" Netrw
+" -----
+
+" Open local-directory browser in full window and in the directory of current file.
+nnoremap <Leader>dd :Explore<CR>
+nnoremap - :Explore<CR>
+
+" Open Netrw sidebar in the directory of the current file.
+" `100 - g:netrw_winsize` is used to make Netrw windows created with
+" `Lexplore` same size as when created with `v` or `o` Netrw commands.
+nnoremap <Leader>de :execute (100 - g:netrw_winsize)."Lexplore %:p:h"<CR>
+
+" Open Netrw sidebar in the current working directory.
+nnoremap <Leader>dw :execute (100 - g:netrw_winsize).'Lexplore'<CR>
+
+" Terminal
+" --------
+
+" Switch to Normal mode in terminal window, use `i` to return to Insert mode.
+tnoremap <C-W>N <C-\><C-N>
+
+" Simulates <C-R> (insert the contents of a register) in Terminal mode.
+tnoremap <expr> <C-R> '<C-\><C-N>"'.nr2char(getchar()).'pi'
+
+" External applications
+" ---------------------
+
+" Krusader.
+if has('nvim')
+    nmap <Leader>ek :call jobstart("krusader --left '" . expand("%:p:h") . "'")<CR>
+else
+    nmap <Leader>ek :call system("krusader --left '" . expand("%:p:h") . "' &")<CR>
+endif
+
+" Misc
+" ----
+
+" Stop highlighting of items found by search (modify highlighting).
+nnoremap <Leader>mh :noh<CR>
+
+nnoremap <F8> :edit $VIM_CONFIG_PATH<CR>
+
+" Use Q for formatting.
+nnoremap Q gq
+
+" Indent.
+" When used in Normal mode key combination must be entered two times.
+vnoremap < <gv
+vnoremap > >gv
+
+" `CTRL-U` in insert mode deletes a lot.
+" Use `CTRL-G u` to first break undo (`:h i_CTRL-G_u`), so that you can undo `CTRL-U`.
+inoremap <C-U> <C-G>u<C-U>
+
+" Options (listed with `:options` command)
+" ========================================
+
+set hlsearch " When there is a previous search pattern, highlight all its matches.
+
+let c_comment_strings=1 " Highlighting strings inside C comments.
+
+" 2. moving around, searching and patterns
+" ----------------------------------------
+
+" `path` is a list of directory names used for file searching (global or local to buffer),
+" `,` is separator,
+" `.` is directory relative to current file,
+" `**` turns on recursive file search,
+" empty string between two `,` searches in current working directory, `:help :pwd`.
+set path=.,**,,
+
+set ignorecase " Ignore case when using a search pattern.
+
+set smartcase " Override `ignorecase` when pattern has upper case characters.
+
+" 3. tags
+" -------
+
+" `,` is separator,
+" `./` searches in the directory of the file rather than current working directory,
+" `;` first searches in directory that precedes semicolon, then in every parent directory.
+set tags=./.tags;,.tags " List of file names to search for tags.
+
+set showfulltag " When completing tags in Insert mode show more info.
+
+" 4. displaying text
+" ------------------
+
+set scrolloff=5 " Number of screen lines to show around the cursor.
+
+set linebreak " Wrap long lines at a character in `:h breakat` (local to window).
+
+set breakindent " Preserve indentation in wrapped text (local to window).
+
+" Include `lastline` to show the last line even if it doesn't fit,
+" include `uhex` to show unprintable characters as a hex number.
+set display=lastline,uhex
+
+set list " Show `<Tab>` as `^I` and end-of-line as `$` (local to window).
+
+" List of strings used for list mode.
+set listchars=tab:>-,trail:-,nbsp:+,space:·,precedes:<,extends:>
+
+set number " Show the line number for each line (local to window).
+
+set relativenumber " Show the relative line number for each line (local to window).
+
+set numberwidth=5 " Number of columns to use for the line number (local to window).
+
+" 5. syntax, highlighting and spelling
+" ------------------------------------
+
+set colorcolumn=121,94 " Columns to highlight (local to window).
+
+" 6. multiple windows
+" -------------------
+
+set splitbelow " When on, splitting a window will put the new window below the current one.
+
+" When on, splitting a window will put the new window right of the current one.
+set splitright
+
+" 8. terminal
+" -----------
+
+" Show info in the window title.
+set title titlestring=%t%(\ %M%)%(\ (%{expand(\"%:~:.:h\")})%)%(\ %a%)
+
+" 9. using the mouse
+" ------------------
+
+set mouse=a " Enable the use of the mouse.
+
+" What the right mouse button is used for: `extend`, `popup` or `popup_setpos`.
+set mousemodel=popup_setpos
+
+" 11. messages and info
+" ---------------------
+
+set helplang=en " List of preferred languages for finding help.
+
+set ruler " Show the cursor position all the time.
+
+set showcmd " Display incomplete commands.
+
+" 12. selecting text
+" ------------------
+
+" When to start Select mode instead of Visual mode: `mouse`, `key` and/or `cmd`.
+set selectmode=
+
+" `unnamed` to use the `*` register like unnamed register,
+" `unnamedplus` variant of the `unnamed` flag which uses the clipboard register `+`.
+set clipboard+=unnamedplus,unnamed
+
+" What special keys can do: `startsel` and/or `stopsel`.
+set keymodel=startsel,stopsel
+
+" 14. tabs and indenting
+" ----------------------
+
+set autoindent
+
+set tabstop=4 " Number of spaces a `<Tab>` in the text stands for (local to buffer).
+
+set shiftwidth=4 " Number of spaces used for each step of (auto)indent (local to buffer).
+
+set softtabstop=4 " If non-zero, number of spaces to insert for a `<Tab>` (local to buffer).
+
+set expandtab " Expand `<Tab>` to spaces in Insert mode (local to buffer).
+
+set cindent " Enable specific indenting for C code.
+
+" Round to `shiftwidth` for `<<` and `>>`. When at 3 spaces, and `>` is hit go to 4, not 7.
+set shiftround
+
+" 17. mapping
+" -----------
+
+" Time in msec for `timeout`, default timeout is 1000ms, see `:help timeoutlen`.
+let s:default_timeoutlen=800
+execute "set timeoutlen=".s:default_timeoutlen
+
+" 18. reading and writing files
+" -----------------------------
+
+" Automatically read a file when it was modified outside of Vim (global or local to buffer).
+set autoread
+
+" 20. command line editing
+" ------------------------
+
+set wildmenu " Command-line completion shows a list of matches.
+
+set wildmode=full " Specifies how command line completion works.
+
+set wildignorecase " Ignore case when completing file names.
+
+" 22. running make and jumping to errors (quickfix)
+" -------------------------------------------------
+
+" Configure the `:grep` command.
+if executable('rg')
+    set grepprg=rg\ --vimgrep\ --hidden\ --smart-case
+endif
+
+" =======
+" Plugins
+" =======
+
+" Netrw (first party plugin)
+" ==========================
+
+" Configuration
+" -------------
+
+" Size of the new windows (in %) when Netrw creates a split with `v` or `o`.
+let g:netrw_winsize = 75
+
+let g:netrw_list_hide = '\(^\|\s\s\)\zs\.\S\+' " Hide dotfiles.
+
+let g:netrw_liststyle = 0 " Thin listing (one file per line).
+
+let g:netrw_banner = 0 " To show banner temporarely use `I` inside Netrw.
+
+" FZF.vim (part of `fzf` binary package), NOT same as https://github.com/junegunn/fzf.vim
+" =======================================================================================
+
+if filereadable('/usr/share/doc/fzf/examples/plugin/fzf.vim')
+    source /usr/share/doc/fzf/examples/plugin/fzf.vim
+endif
+
+" Configuration
+" -------------
+
+" Documentation: https://github.com/junegunn/fzf/blob/master/README-VIM.md
+
+" let g:fzf_layout = { 'left': '~50%' }
