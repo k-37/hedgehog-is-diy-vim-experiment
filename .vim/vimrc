@@ -24,6 +24,31 @@ function <SID>StripTrailingWhitespaces() abort
     call cursor(l, c)
 endfunction
 
+function SetStatusLine() abort
+    let s:statusLine = ''
+    let s:statusLine .= '%m'
+    let s:statusLine .= '%r'
+    let s:statusLine .= '%h'
+    let s:statusLine .= '%w'
+    let s:statusLine .= ' %F'
+    let s:statusLine .= '%='
+    let s:statusLine .= ' %y'
+    let s:statusLine .= ' %{&fileformat}'
+    let s:statusLine .= ' %{&fileencoding}'
+    let s:statusLine .= ' | %b = %B'
+    let s:statusLine .= ' | %l/%L:%c'
+    let s:statusLine .= ' | %P'
+
+    if mode() == 'i'
+        return '%1*'.s:statusLine
+    elseif mode() == 'v' || mode() == "\<C-V>"
+        return '%2*'.s:statusLine
+    elseif mode() == 'R' || mode() == 'Rv'
+        return '%3*'.s:statusLine
+    endif
+    return '%0*'.s:statusLine
+endfunction
+
 " Paste
 " =====
 
@@ -49,96 +74,6 @@ function <SID>PasteInInsertMode() abort
     else
         return "\<C-O>\P"
     endif
-endfunction
-
-" Color scheme
-" ============
-
-function <SID>LoadColorScheme() abort
-    " Set color scheme which is good for 'black on white' and 'white on black' terminals.
-    set background=dark
-    silent! colorscheme desert
-
-    set cursorline " Highlight the screen line of the cursor (local to window).
-    highlight CursorLine term=NONE cterm=NONE gui=NONE ctermbg=08
-    " Highlight line number of the current line.
-    highlight CursorLineNr term=bold cterm=bold gui=bold ctermbg=89 guibg=#87005f
-
-    " Configure normal text (default background color).
-    highlight Normal term=NONE cterm=NONE gui=NONE
-        \ ctermfg=15 ctermbg=236 guifg=#FFFFFF guibg=#303030
-
-    " Configure white spaces.
-    highlight Whitespace term=NONE cterm=NONE gui=NONE ctermfg=75 guifg=#71716b
-
-    if has("autocmd")
-        augroup CursorLine
-            " Remove all autocommands for the current group.
-            autocmd!
-
-            " Highlight current line on entering Insert mode.
-            autocmd InsertEnter * highlight CursorLine term=NONE cterm=NONE gui=NONE
-                \ ctermbg=89 guibg=#87005f
-            autocmd InsertEnter * set timeoutlen=0
-            autocmd InsertLeave * highlight CursorLine term=NONE cterm=NONE gui=NONE
-                \ ctermbg=08 guibg=#666666
-            autocmd InsertLeave * execute "set timeoutlen=".s:default_timeoutlen
-        augroup END
-    endif
-
-    call <SID>SetTablineAndStatusLine()
-endfunction
-
-function <SID>SetTablineAndStatusLine() abort
-    " Tab line.
-    highlight TabLine guifg=#FFFFFF guibg=#000000 gui=NONE ctermfg=15 ctermbg=0 cterm=NONE
-    highlight TabLineSel guifg=#000000 guibg=#FFFFFF ctermfg=0 ctermbg=15
-
-    " Status line.
-    highlight StatusLine guifg=#000000 guibg=#FFFFFF cterm=NONE ctermfg=0 ctermbg=15
-    highlight StatusLineNC guifg=#FFFFFF guibg=#000000 cterm=NONE ctermfg=15 ctermbg=0
-
-    " Status line Insert.
-    highlight User1 guifg=#010101 guibg=#FFFF00 cterm=NONE ctermfg=16 ctermbg=11
-
-    " Status line Visual.
-    highlight User2 guifg=#010101 guibg=#00FF00 ctermfg=16 ctermbg=10
-
-    " Status line Replace/Virtual replace.
-    highlight User3 guifg=#010101 guibg=#FF00FF cterm=NONE ctermfg=16 ctermbg=13
-
-    set showtabline=2 " Always show tab pages line.
-    set laststatus=2 " Always show status line.
-
-    " Alternate format to be used for a status line.
-    set statusline=%!SetStatusLine()
-
-    let s:statusLine = ''
-    let s:statusLine .= '%m'
-    let s:statusLine .= '%r'
-    let s:statusLine .= '%h'
-    let s:statusLine .= '%w'
-    let s:statusLine .= ' %F'
-    let s:statusLine .= '%='
-    let s:statusLine .= ' %y'
-    let s:statusLine .= ' %{&fileformat}'
-    let s:statusLine .= ' %{&fileencoding}'
-    let s:statusLine .= ' | %b = %B'
-    let s:statusLine .= ' | %l/%L:%c'
-    let s:statusLine .= ' | %P'
-
-    function! SetStatusLine() abort
-        if mode() == 'i'
-            " Sets User1 highlight group.
-            return '%1*'.s:statusLine
-        elseif mode() == 'v' || mode() == "\<C-V>"
-            return '%2*'.s:statusLine
-        elseif mode() == 'R' || mode() == 'Rv'
-            return '%3*'.s:statusLine
-        endif
-        " Sets StatusLine highlight group.
-        return '%0*'.s:statusLine
-    endfunction
 endfunction
 
 " Netrw
@@ -224,29 +159,22 @@ function! s:RgHandler(lines) abort
     endfor
 endfunction
 
-" ===========
-" Autocommand
-" ===========
+" ============
+" Autocommands
+" ============
 
 if has("autocmd")
-    if has('nvim')
-        " Start terminal in Insert mode.
-        autocmd TermOpen * startinsert
-    endif
-
-    augroup vimrcEx
+    augroup default
         " Remove all autocommands for the current group.
         autocmd!
 
-        autocmd VimEnter * call <SID>LoadColorScheme()
-
-        " Automatically reload config when modified.
         if has('nvim')
-            autocmd BufWritePost $MYVIMRC,$VIM_CONFIG_PATH source $MYVIMRC
-                \ | call <SID>LoadColorScheme()
-        else
-            autocmd BufWritePost $MYVIMRC source $MYVIMRC | call <SID>LoadColorScheme()
+            " Start terminal in Insert mode.
+            autocmd TermOpen * startinsert
         endif
+
+        " Automatically reload configuration when modified.
+        autocmd BufWritePost *vimrc,*exrc,*init.vim :call feedkeys(":source %\<CR>")
 
         " Strip trailing whitespace on save for all files.
         " For only some file types use:
@@ -256,7 +184,6 @@ if has("autocmd")
     augroup END
 
     augroup netrw
-        " Remove all autocommands for the current group.
         autocmd!
 
         " Focus previous active file in Netrw buffer when switching to it with `:Explore`.
@@ -271,7 +198,6 @@ if has("autocmd")
     augroup END
 
     augroup netrw_mapping
-        " Remove all autocommands for the current group.
         autocmd!
 
         " Go up a directory.
@@ -300,11 +226,77 @@ if has("autocmd")
         " Delete a file.
         autocmd FileType netrw nmap <buffer> fd D
     augroup END
+
+    " Highlight current line on entering Insert mode.
+    augroup cursor_line
+        autocmd!
+
+        autocmd InsertEnter * highlight CursorLine term=NONE cterm=NONE gui=NONE
+            \ ctermbg=89 guibg=#87005f
+        autocmd InsertEnter * set timeoutlen=0
+        autocmd InsertLeave * highlight CursorLine term=NONE cterm=NONE gui=NONE
+            \ ctermbg=08 guibg=#666666
+        autocmd InsertLeave * execute "set timeoutlen=".s:default_timeoutlen
+    augroup END
+
+    " Overrides for desert colorscheme.
+    augroup desert_override
+        autocmd!
+
+        " Configure cursor line.
+        autocmd ColorScheme desert
+            \ highlight CursorLine term=NONE cterm=NONE gui=NONE ctermbg=08
+        " Configure line number of the current line.
+        autocmd ColorScheme desert
+            \ highlight CursorLineNr term=bold cterm=bold gui=bold ctermbg=89 guibg=#87005f
+
+        " Configure normal text (default background color).
+        autocmd ColorScheme desert
+            \ highlight Normal term=NONE cterm=NONE gui=NONE
+            \ ctermfg=15 ctermbg=236 guifg=#FFFFFF guibg=#303030
+
+        " Configure white spaces.
+        autocmd ColorScheme desert
+            \ highlight Whitespace term=NONE cterm=NONE gui=NONE ctermfg=75 guifg=#71716b
+
+        " Tab line.
+        autocmd ColorScheme desert
+            \ highlight TabLine guifg=#FFFFFF guibg=#000000 gui=NONE
+            \ ctermfg=15 ctermbg=0 cterm=NONE
+        autocmd ColorScheme desert
+            \ highlight TabLineSel guifg=#000000 guibg=#FFFFFF ctermfg=0 ctermbg=15
+
+        " Status line.
+        autocmd ColorScheme desert
+            \ highlight StatusLine guifg=#000000 guibg=#FFFFFF
+            \ cterm=NONE ctermfg=0 ctermbg=15
+        autocmd ColorScheme desert
+            \ highlight StatusLineNC guifg=#FFFFFF guibg=#000000
+            \ cterm=NONE ctermfg=15 ctermbg=0
+
+        " Status line Insert.
+        autocmd ColorScheme desert
+            \ highlight User1 guifg=#010101 guibg=#FFFF00 cterm=NONE ctermfg=16 ctermbg=11
+
+        " Status line Visual.
+        autocmd ColorScheme desert
+            \ highlight User2 guifg=#010101 guibg=#00FF00 ctermfg=16 ctermbg=10
+
+        " Status line Replace/Virtual replace.
+        autocmd ColorScheme desert
+            \ highlight User3 guifg=#010101 guibg=#FF00FF cterm=NONE ctermfg=16 ctermbg=13
+    augroup END
 endif
 
 " =============
 " Configuration
 " =============
+
+" Colorscheme
+" ===========
+
+set background=dark
+silent! colorscheme desert
 
 " Commands
 " ========
@@ -688,15 +680,27 @@ set numberwidth=5 " Number of columns to use for the line number (local to windo
 " 5. syntax, highlighting and spelling
 " ------------------------------------
 
+set cursorline " Highlight the screen line of the cursor (local to window).
+
 set colorcolumn=121,94 " Columns to highlight (local to window).
 
 " 6. multiple windows
 " -------------------
 
+set laststatus=2 " Always show status line.
+
+" Alternate format to be used for a status line.
+set statusline=%!SetStatusLine()
+
 set splitbelow " When on, splitting a window will put the new window below the current one.
 
 " When on, splitting a window will put the new window right of the current one.
 set splitright
+
+" 7. multiple tab pages
+" ---------------------
+
+set showtabline=2 " Always show tab pages line.
 
 " 8. terminal
 " -----------
