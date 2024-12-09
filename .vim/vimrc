@@ -176,6 +176,9 @@ if has("autocmd")
         " Automatically reload configuration when modified.
         autocmd BufWritePost *vimrc,*exrc,*init.vim :call feedkeys(":source %\<CR>")
 
+        " Check if any buffers were changed outside of Vim.
+        autocmd FocusGained,BufEnter * :checktime
+
         " Strip trailing whitespace on save for all files.
         " For only some file types use:
         " autocmd FileType c,cpp,java,php,ruby,python autocmd BufWritePre <buffer>
