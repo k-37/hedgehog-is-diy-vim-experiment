@@ -25,28 +25,85 @@ function <SID>StripTrailingWhitespaces() abort
 endfunction
 
 function SetStatusLine() abort
-    let s:statusLine = ''
-    let s:statusLine .= '%m'
-    let s:statusLine .= '%r'
-    let s:statusLine .= '%h'
-    let s:statusLine .= '%w'
-    let s:statusLine .= ' %F'
-    let s:statusLine .= '%='
-    let s:statusLine .= ' %y'
-    let s:statusLine .= ' %{&fileformat}'
-    let s:statusLine .= ' %{&fileencoding}'
-    let s:statusLine .= ' | %b = %B'
-    let s:statusLine .= ' | %l/%L:%c'
-    let s:statusLine .= ' | %P'
+    let l:statusLine = ''
+    let l:statusLine .= '%m'
+    let l:statusLine .= '%r'
+    let l:statusLine .= '%h'
+    let l:statusLine .= '%w'
+    let l:statusLine .= ' %F'
+    let l:statusLine .= '%='
+    let l:statusLine .= ' %y'
+    let l:statusLine .= ' %{&fileformat}'
+    let l:statusLine .= ' %{&fileencoding}'
+    let l:statusLine .= ' | %b = %B'
+    let l:statusLine .= ' | %l/%L:%c'
+    let l:statusLine .= ' | %P'
 
     if mode() == 'i'
-        return '%1*'.s:statusLine
+        return '%1*'.l:statusLine
     elseif mode() == 'v' || mode() == "\<C-V>"
-        return '%2*'.s:statusLine
+        return '%2*'.l:statusLine
     elseif mode() == 'R' || mode() == 'Rv'
-        return '%3*'.s:statusLine
+        return '%3*'.l:statusLine
     endif
-    return '%0*'.s:statusLine
+    return '%0*'.l:statusLine
+endfunction
+
+" Tab Line
+" ========
+
+function SetTabLine() abort
+    let l:tabLine  = ''
+    for i in range(tabpagenr('$'))
+        " Select the highlighting.
+        if i + 1 == tabpagenr()
+            let l:tabLine .= '%#TabLineSel#'
+        else
+            let l:tabLine .= '%#TabLine#'
+        endif
+
+        " Set the tab page number (for mouse clicks).
+        let l:tabLine .= '%' . (i + 1) . 'T'
+        " Display tab number (e.g. for use with `<TAB_NUMBER>gt`).
+        let l:tabLine .= ' ' . (i + 1) . '/'
+
+        " Rest of the tab label is made by `SetTabLabel()` function.
+        let l:tabLine .= ' %{SetTabLabel(' . (i + 1) . ')} '
+    endfor
+
+    " After the last tab, fill using `TabLineFill` highlight group and reset tab page number.
+    let l:tabLine .= '%#TabLineFill#%T'
+
+    " Right-align the label to close the current tab page.
+    if tabpagenr('$') > 1
+        let l:tabLine .= '%=%#TabLine#%999XX'
+    endif
+
+    return l:tabLine
+endfunction
+
+function SetTabLabel(n)
+    let l:tabLabel  = ''
+    let l:buffer_list = tabpagebuflist(a:n)
+
+    " Add indicator if one of the buffers in the tab page is modified.
+    for buffer_number in l:buffer_list
+        if getbufvar(buffer_number, "&modified")
+            let l:tabLabel .= '[+] '
+            break
+        endif
+    endfor
+
+    " Add count of windows (panes) in the tab.
+    let l:window_count = tabpagewinnr(a:n, '$')
+    let l:tabLabel .= l:window_count > 1 ? '(' . l:window_count . ') ' : ''
+
+    " Add file name.
+    let l:window_number = tabpagewinnr(a:n)
+    let l:file_name = fnamemodify(bufname(l:buffer_list[l:window_number - 1]), ':t')
+    let l:tabLabel .= empty(l:file_name) ? '[No Name]' : l:file_name
+
+    return l:tabLabel
 endfunction
 
 " Paste
@@ -709,6 +766,9 @@ set splitright
 " ---------------------
 
 set showtabline=2 " Always show tab pages line.
+
+" Alternate format to be used for a tab line.
+set tabline=%!SetTabLine()
 
 " 8. terminal
 " -----------

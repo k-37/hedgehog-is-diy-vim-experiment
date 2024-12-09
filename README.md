@@ -27,6 +27,7 @@ On Debian/Ubuntu:
 - Customized `desert` color scheme.
 - Copy and paste with `<Ctrl-Insert>` and `<Shift-Insert>` respectively.
 - Show unsaved changes in separate tab with `<F5>`.
+- Custom tab line with numbered tabs for quick access with `Alt-<TAB_NUMBER>`.
 - Custom status line.
 - Use `-` to open directory browser and, `hjkl` to traverse file system.
 - Fuzzy find files with `<Space>ff`, find string in files with `<Space>fs`.
