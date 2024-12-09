@@ -611,6 +611,9 @@ endif
 " Stop highlighting of items found by search (modify highlighting).
 nnoremap <Leader>mh :noh<CR>
 
+" Toggle spell checking (modify spell checking).
+nnoremap <Leader>ms :set spell!<CR>
+
 nnoremap <F8> :edit $VIM_CONFIG_PATH<CR>
 
 " Use Q for formatting.
