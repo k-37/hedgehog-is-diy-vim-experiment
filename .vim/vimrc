@@ -329,6 +329,9 @@ command! -nargs=* Files call <SID>FZF()
 " Call as `:Rg <pattern>`.
 command! -nargs=* Rg call <SID>RG(<q-args>)
 
+" Reverse selection.
+command! -range=% -nargs=0 -bar Reverse <line1>,<line2>global/^/move <line1>-1 | nohlsearch
+
 " It works by adding random number and space to start of the line, sorting by number,
 " and removing what was added.
 command! -range=% -nargs=0 -bar Shuffle :silent!
@@ -505,11 +508,11 @@ vnoremap <F4> :normal! @q<CR>
 " Search and replace
 " ------------------
 
-" Search selection, `:help :s`.
-" We use replace which can define custom delimiter e.g. `;` (`:h E146`). `g` in `gn` replaces
-" all occurences in the line, `n` reports number of matches without doing substituton.
-" `<C-R>"` pastes contents of the `"` register which was filled with yank `y`.
-vnoremap <F3> y<BS>:%s;<C-R>";;gn<CR>n
+" Search selection as literal.
+" `\V` activates "very nomagic" mode (`:h /\V`),
+" but we still need to escape `\` and `/` characters, which are not literals with `\V`.
+" `<C-R>` inserts contents of the `"` register which was filled with yank `y`.
+vnoremap <F3> y<BS>/\V<C-R>=escape(@",'/\')<CR><CR>
 
 " Move cursor on top of a word or select some text, press defined combination, type changes,
 " exit Insert mode. Now press `.` to repeat changes to the next match, or
@@ -521,7 +524,7 @@ vnoremap <F3> y<BS>:%s;<C-R>";;gn<CR>n
 nnoremap <M-F2> :let @/='\<'.expand('<cword>').'\>'<CR>cgn
 xnoremap <M-F2> "sy:let @/=@s<CR>cgn
 
-" Search and replace selection below cursor.
+" Search and replace selection below cursor, `:help :s`.
 " `.,$s` is range setting.
 " `I` is for case sensitive, replace it with `i` for case insensitive.
 vnoremap <F2> y<BS>:.,$s;<C-R>";<C-R>";gcI<Left><Left><Left><Left>
@@ -543,9 +546,8 @@ vnoremap <S-F2> y<BS>:%s;<C-R>";<C-R>";gcI<Left><Left><Left><Left>
 vnoremap <F9> :sort<CR>:normal gv<CR>:sort i<CR>
 
 " Sort selection and reverse results.
-" `:global/^/move 0` is used to reverse sort results.
 vnoremap <S-F9> :sort<CR>:normal gv<CR>:sort i<CR>
-    \:normal gv<CR>:global/^/move 0<CR>:nohlsearch<CR>
+    \:normal gv<CR>:Reverse<CR>
 
 " Shuffle selected lines.
 vnoremap <C-F9>s :Shuffle<CR>
@@ -688,7 +690,7 @@ set numberwidth=5 " Number of columns to use for the line number (local to windo
 
 set cursorline " Highlight the screen line of the cursor (local to window).
 
-set colorcolumn=121,94 " Columns to highlight (local to window).
+set colorcolumn=94 " Columns to highlight (local to window).
 
 " 6. multiple windows
 " -------------------
