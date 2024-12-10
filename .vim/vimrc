@@ -163,6 +163,26 @@ function <SID>FZF() abort
     endif
 endfunction
 
+function <SID>Buffers() abort
+    call fzf#run(fzf#wrap({
+    \   'source': reverse(<SID>BufferList()),
+    \   'sink': function('<SID>BufferOpen'),
+    \   'options': '--reverse',
+    \   'down': len(<SID>BufferList()) + 2
+    \}))
+endfunction
+
+function! s:BufferList() abort
+    redir => ls
+    silent ls
+    redir END
+    return split(ls, '\n')
+endfunction
+
+function! s:BufferOpen(e) abort
+    execute 'buffer' matchstr(a:e, '^[ 0-9]*')
+endfunction
+
 function <SID>RG(args) abort
     let l:searchcommand = 'rg --vimgrep --hidden --smart-case -- '
     let l:pattern = '.'
@@ -383,6 +403,8 @@ command! MakeTags silent !ctags -f .tags -R . &>/dev/null &
 
 command! -nargs=* Files call <SID>FZF()
 
+command! -nargs=* Buffers call <SID>Buffers()
+
 " Call as `:Rg <pattern>`.
 command! -nargs=* Rg call <SID>RG(<q-args>)
 
@@ -446,8 +468,8 @@ if has('nvim')
     tnoremap <expr> <S-Insert> '<C-\><C-N>pi'
 endif
 
-" Find
-" ----
+" Files
+" -----
 
 " Fuzzy find files.
 nnoremap <Leader>ff :Files<CR>
@@ -466,6 +488,9 @@ nnoremap <Leader>fs :Rg<Space>
 
 " List buffers which then can be opened with `:b <BUFFER_NUMBER>`.
 nnoremap <Leader>bl :buffers<CR>
+
+" Fuzzy find buffers.
+nnoremap <Leader>bf :Buffers<CR>
 
 " Tabs
 " ----
