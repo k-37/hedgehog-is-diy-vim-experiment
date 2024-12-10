@@ -510,11 +510,11 @@ nnoremap <M-8> :tabnext 8<CR>
 nnoremap <M-9> :tabnext 9<CR>
 nnoremap <M-0> :tabnext 10<CR>
 
-" Open tab at the end.
-nnoremap <Leader>tt :$tabnew<CR>
+" Open tab, with the current buffer, at the end.
+nnoremap <Leader>tt :$tabnew %<CR>
 
-" Open tab next to current tab.
-nnoremap <Leader>tn :tabnew<CR>
+" Open tab, with the current buffer, next to the current tab.
+nnoremap <Leader>tn :tabnew %<CR>
 
 " Close tab.
 nnoremap <Leader>tc :tabclose<CR>
