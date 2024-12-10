@@ -492,6 +492,14 @@ nnoremap <Leader>bl :buffers<CR>
 " Fuzzy find buffers.
 nnoremap <Leader>bf :Buffers<CR>
 
+" Move between buffers.
+nnoremap <C-S-M-h> :bprevious<CR>
+nnoremap <C-S-M-l> :bnext<CR>
+
+" Switch to next buffer, unload and delete previous from the buffer list.
+nnoremap <Leader>bd :bnext<CR>:bdelete#<CR>
+nnoremap <S-F4> :bnext<CR>:bdelete#<CR>
+
 " Tabs
 " ----
 
@@ -516,8 +524,8 @@ nnoremap <Leader>tt :$tabnew %<CR>
 " Open tab, with the current buffer, next to the current tab.
 nnoremap <Leader>tn :tabnew %<CR>
 
-" Close tab.
-nnoremap <Leader>tc :tabclose<CR>
+" Delete tab.
+nnoremap <Leader>td :tabclose<CR>
 nnoremap <C-F4> :tabclose<CR>
 
 " Move between tabs.
