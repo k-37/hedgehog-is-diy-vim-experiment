@@ -24,7 +24,7 @@ function <SID>StripTrailingWhitespaces() abort
     call cursor(l, c)
 endfunction
 
-function SetStatusLine() abort
+function! SetStatusLine() abort
     let l:statusLine = ''
     let l:statusLine .= '%m'
     let l:statusLine .= '%r'
@@ -52,8 +52,11 @@ endfunction
 " Tab Line
 " ========
 
-function SetTabLine() abort
+function! SetTabLine() abort
     let l:tabLine  = ''
+    let l:columnsPerTabLabel = (&columns - tabpagenr('$') * 5) / tabpagenr('$')
+    let l:tabLabelSize = l:columnsPerTabLabel > 15 ? l:columnsPerTabLabel : 15
+
     for i in range(tabpagenr('$'))
         " Select the highlighting.
         if i + 1 == tabpagenr()
@@ -68,7 +71,7 @@ function SetTabLine() abort
         let l:tabLine .= ' ' . (i + 1) . '/'
 
         " Rest of the tab label is made by `SetTabLabel()` function.
-        let l:tabLine .= ' %{SetTabLabel(' . (i + 1) . ')} '
+        let l:tabLine .= ' %{SetTabLabel(' . (i + 1) . ',' . l:tabLabelSize . ')} '
     endfor
 
     " After the last tab, fill using `TabLineFill` highlight group and reset tab page number.
@@ -82,7 +85,7 @@ function SetTabLine() abort
     return l:tabLine
 endfunction
 
-function SetTabLabel(n)
+function! SetTabLabel(n, tabLabelSize)
     let l:tabLabel  = ''
     let l:buffer_list = tabpagebuflist(a:n)
 
@@ -102,6 +105,12 @@ function SetTabLabel(n)
     let l:window_number = tabpagewinnr(a:n)
     let l:file_name = fnamemodify(bufname(l:buffer_list[l:window_number - 1]), ':t')
     let l:tabLabel .= empty(l:file_name) ? '[No Name]' : l:file_name
+
+    if len(l:tabLabel) > a:tabLabelSize
+        let l:tabLabel = strpart(l:tabLabel, 0, 8)
+        \    . '~'
+        \    . strpart(l:tabLabel, len(l:tabLabel) - a:tabLabelSize + 10)
+    endif
 
     return l:tabLabel
 endfunction
