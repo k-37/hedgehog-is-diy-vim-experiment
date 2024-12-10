@@ -673,25 +673,26 @@ inoremap ' ''<C-G>U<Left>
 inoremap ` ``<C-G>U<Left>
 
 " Surround visual selection.
-vnoremap <Leader>{ <Esc>`>a}<Esc>`<i{<Esc>
-vnoremap <Leader>( <Esc>`>a)<Esc>`<i(<Esc>
-vnoremap <Leader>[ <Esc>`>a]<Esc>`<i[<Esc>
-vnoremap <Leader>< <Esc>`>a><Esc>`<i<<Esc>
-vnoremap <Leader>" <Esc>`>a"<Esc>`<i"<Esc>
-vnoremap <Leader>' <Esc>`>a'<Esc>`<i'<Esc>
-vnoremap <Leader>` <Esc>`>a`<Esc>`<i`<Esc>
+vnoremap <Leader>{ <Esc>`<i{<Esc>`><Right>a}<Esc>
+vnoremap <Leader>( <Esc>`<i(<Esc>`><Right>a)<Esc>
+vnoremap <Leader>[ <Esc>`<i[<Esc>`><Right>a]<Esc>
+vnoremap <Leader>< <Esc>`<i<<Esc>`><Right>a><Esc>
+vnoremap <Leader>" <Esc>`<i"<Esc>`><Right>a"<Esc>
+vnoremap <Leader>' <Esc>`<i'<Esc>`><Right>a'<Esc>
+vnoremap <Leader>` <Esc>`<i`<Esc>`><Right>a`<Esc>
 
-" Delete surround of visual selection.
-vnoremap <Leader>x <Esc>`>a<BS><Esc>`<i<Delete><Esc>
+" Delete surround of visual selection. When delete is done at the end of the
+" line cursor will not be at the end of previously selected text.
+vnoremap <Leader>x <Esc>`>a<BS><Esc>`<i<Delete><Esc>`>2<Left>
 
 " Replace surround of visual selection.
-vnoremap <Leader>r{ <Esc>`>a<BS>}<Esc>`<i<Delete>{<Esc>
-vnoremap <Leader>r( <Esc>`>a<BS>)<Esc>`<i<Delete>(<Esc>
-vnoremap <Leader>r[ <Esc>`>a<BS>]<Esc>`<i<Delete>[<Esc>
-vnoremap <Leader>r< <Esc>`>a<BS>><Esc>`<i<Delete><<Esc>
-vnoremap <Leader>r" <Esc>`>a<BS>"<Esc>`<i<Delete>"<Esc>
-vnoremap <Leader>r' <Esc>`>a<BS>'<Esc>`<i<Delete>'<Esc>
-vnoremap <Leader>r` <Esc>`>a<BS>`<Esc>`<i<Delete>`<Esc>
+vnoremap <Leader>r{ <Esc>`<r{<Esc>`>r}<Esc>
+vnoremap <Leader>r( <Esc>`<r(<Esc>`>r)<Esc>
+vnoremap <Leader>r[ <Esc>`<r[<Esc>`>r]<Esc>
+vnoremap <Leader>r< <Esc>`<r<<Esc>`>r><Esc>
+vnoremap <Leader>r" <Esc>`<r"<Esc>`>r"<Esc>
+vnoremap <Leader>r' <Esc>`<r'<Esc>`>r'<Esc>
+vnoremap <Leader>r` <Esc>`<r`<Esc>`>r`<Esc>
 
 " Netrw
 " -----
