@@ -655,6 +655,15 @@ inoremap " ""<C-G>U<Left>
 inoremap ' ''<C-G>U<Left>
 inoremap ` ``<C-G>U<Left>
 
+" Surround visual selection.
+vnoremap <Leader>{ <Esc>`>a}<Esc>`<i{<Esc>
+vnoremap <Leader>( <Esc>`>a)<Esc>`<i(<Esc>
+vnoremap <Leader>[ <Esc>`>a]<Esc>`<i[<Esc>
+vnoremap <Leader>< <Esc>`>a><Esc>`<i<<Esc>
+vnoremap <Leader>" <Esc>`>a"<Esc>`<i"<Esc>
+vnoremap <Leader>' <Esc>`>a'<Esc>`<i'<Esc>
+vnoremap <Leader>` <Esc>`>a`<Esc>`<i`<Esc>
+
 " Netrw
 " -----
 
