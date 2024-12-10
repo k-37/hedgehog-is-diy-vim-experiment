@@ -643,7 +643,7 @@ vnoremap <C-F9>u :sort u<CR>
 " One leading '-' is included in the number for signed numbers.
 vnoremap <C-F9>n :sort n<CR>
 
-" Matching brace and qoute
+" Matching brace and quote
 " ------------------------
 
 " `<C-G> U` preserves undo sequence (`:h i_CTRL-G_U`).
@@ -663,6 +663,18 @@ vnoremap <Leader>< <Esc>`>a><Esc>`<i<<Esc>
 vnoremap <Leader>" <Esc>`>a"<Esc>`<i"<Esc>
 vnoremap <Leader>' <Esc>`>a'<Esc>`<i'<Esc>
 vnoremap <Leader>` <Esc>`>a`<Esc>`<i`<Esc>
+
+" Delete surround of visual selection.
+vnoremap <Leader>x <Esc>`>a<BS><Esc>`<i<Delete><Esc>
+
+" Replace surround of visual selection.
+vnoremap <Leader>r{ <Esc>`>a<BS>}<Esc>`<i<Delete>{<Esc>
+vnoremap <Leader>r( <Esc>`>a<BS>)<Esc>`<i<Delete>(<Esc>
+vnoremap <Leader>r[ <Esc>`>a<BS>]<Esc>`<i<Delete>[<Esc>
+vnoremap <Leader>r< <Esc>`>a<BS>><Esc>`<i<Delete><<Esc>
+vnoremap <Leader>r" <Esc>`>a<BS>"<Esc>`<i<Delete>"<Esc>
+vnoremap <Leader>r' <Esc>`>a<BS>'<Esc>`<i<Delete>'<Esc>
+vnoremap <Leader>r` <Esc>`>a<BS>`<Esc>`<i<Delete>`<Esc>
 
 " Netrw
 " -----
