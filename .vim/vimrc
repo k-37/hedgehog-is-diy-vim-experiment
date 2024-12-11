@@ -788,6 +788,10 @@ set showfulltag " When completing tags in Insert mode show more info.
 " 4. displaying text
 " ------------------
 
+if exists('+smoothscroll')
+    set smoothscroll " Scroll·by·screen·line (local to window).
+endif
+
 set scrolloff=5 " Number of screen lines to show around the cursor.
 
 set linebreak " Wrap long lines at a character in `:h breakat` (local to window).
