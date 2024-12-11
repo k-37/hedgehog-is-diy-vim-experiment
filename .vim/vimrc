@@ -739,9 +739,6 @@ nnoremap <Leader>ms :set spell!<CR>
 
 nnoremap <F8> :edit $VIM_CONFIG_PATH<CR>
 
-" Use Q for formatting.
-nnoremap Q gq
-
 " Indent.
 " When used in Normal mode key combination must be entered two times.
 vnoremap < <gv
