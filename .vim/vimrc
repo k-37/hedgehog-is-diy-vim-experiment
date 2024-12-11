@@ -26,12 +26,12 @@ endfunction
 
 function! SetStatusLine() abort
     let l:statusLine = ''
-    let l:statusLine .= '%m'
+    let l:statusLine .= '%F'
+    let l:statusLine .= '%='
+    let l:statusLine .= ' %m'
     let l:statusLine .= '%r'
     let l:statusLine .= '%h'
     let l:statusLine .= '%w'
-    let l:statusLine .= ' %F'
-    let l:statusLine .= '%='
     let l:statusLine .= ' %y'
     let l:statusLine .= ' %{&fileformat}'
     let l:statusLine .= ' %{&fileencoding}'
