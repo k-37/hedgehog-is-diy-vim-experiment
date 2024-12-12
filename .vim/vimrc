@@ -691,8 +691,8 @@ inoremap ( ()<C-G>U<Left>
 inoremap [ []<C-G>U<Left>
 inoremap < <><C-G>U<Left>
 inoremap " ""<C-G>U<Left>
-inoremap ' ''<C-G>U<Left>
 inoremap ` ``<C-G>U<Left>
+" Mapping for `'` is not defined intentionally because it is often used without a pair.
 
 " Surround visual selection.
 vnoremap <Leader>{ <Esc>`<i{<Esc>`><Right>a}<Esc>
@@ -705,7 +705,7 @@ vnoremap <Leader>` <Esc>`<i`<Esc>`><Right>a`<Esc>
 
 " Delete surround of visual selection. When delete is done at the end of the
 " line cursor will not be at the end of previously selected text.
-vnoremap <Leader>x <Esc>`>a<BS><Esc>`<i<Delete><Esc>`>2<Left>
+vnoremap <Leader>xx <Esc>`>a<BS><Esc>`<i<Delete><Esc>`>2<Left>
 
 " Replace surround of visual selection.
 vnoremap <Leader>r{ <Esc>`<r{<Esc>`>r}<Esc>
@@ -786,6 +786,8 @@ let c_comment_strings=1 " Highlighting strings inside C comments.
 " `**` turns on recursive file search,
 " empty string between two `,` searches in current working directory, `:help :pwd`.
 set path=.,**,,
+
+set incsearch " Show match for partly typed search command.
 
 set ignorecase " Ignore case when using a search pattern.
 
@@ -915,7 +917,7 @@ set shiftround
 " -----------
 
 " Time in msec for `timeout`, default timeout is 1000ms, see `:help timeoutlen`.
-let s:default_timeoutlen=9000
+let s:default_timeoutlen=13337
 execute "set timeoutlen=".s:default_timeoutlen
 
 " 18. reading and writing files
