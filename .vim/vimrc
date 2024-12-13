@@ -256,7 +256,7 @@ if has("autocmd")
 
         if has('nvim')
             " Start terminal in Insert mode.
-            autocmd TermOpen * startinsert
+            autocmd TermOpen,TermEnter * startinsert
         endif
 
         " Automatically reload configuration when modified.
@@ -734,11 +734,13 @@ nnoremap <Leader>dw :execute (100 - g:netrw_winsize).'Lexplore'<CR>
 " Terminal
 " --------
 
-" Switch to Normal mode in terminal window, use `i` to return to Insert mode.
-tnoremap <C-W>N <C-\><C-N>
+if has('nvim')
+    " Switch to Normal mode in terminal window, use `i` to return to Insert mode.
+    tnoremap <C-W> <C-\><C-N><C-W>
 
-" Simulates <C-R> (insert the contents of a register) in Terminal mode.
-tnoremap <expr> <C-R> '<C-\><C-N>"'.nr2char(getchar()).'pi'
+    " Simulates <C-R> (insert the contents of a register) in Terminal mode.
+    tnoremap <expr> <C-R> '<C-\><C-N>"'.nr2char(getchar()).'pi'
+endif
 
 " External applications
 " ---------------------
