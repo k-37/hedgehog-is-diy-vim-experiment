@@ -66,12 +66,12 @@ function! SetTabLine() abort
         endif
 
         " Set the tab page number (for mouse clicks).
-        let l:tabLine .= '%' . (i + 1) . 'T'
+        let l:tabLine .= '%' .. (i + 1) .. 'T'
         " Display tab number (e.g. for use with `<TAB_NUMBER>gt`).
-        let l:tabLine .= ' ' . (i + 1) . '/'
+        let l:tabLine .= ' ' .. (i + 1) .. '/'
 
         " Rest of the tab label is made by `SetTabLabel()` function.
-        let l:tabLine .= ' %{SetTabLabel(' . (i + 1) . ',' . l:tabLabelSize . ')} '
+        let l:tabLine .= ' %{SetTabLabel(' .. (i + 1) .. ',' .. l:tabLabelSize .. ')} '
     endfor
 
     " After the last tab, fill using `TabLineFill` highlight group and reset tab page number.
@@ -89,27 +89,27 @@ function! SetTabLabel(n, tabLabelSize)
     let l:tabLabel  = ''
     let l:buffer_list = tabpagebuflist(a:n)
 
+    " Add count of windows (panes) in the tab.
+    let l:window_count = tabpagewinnr(a:n, '$')
+    let l:tabLabel .= l:window_count > 1 ? l:window_count : ''
+
     " Add indicator if one of the buffers in the tab page is modified.
     for buffer_number in l:buffer_list
         if getbufvar(buffer_number, "&modified")
-            let l:tabLabel .= '[+] '
+            let l:tabLabel .= '+'
             break
         endif
     endfor
 
-    " Add count of windows (panes) in the tab.
-    let l:window_count = tabpagewinnr(a:n, '$')
-    let l:tabLabel .= l:window_count > 1 ? '(' . l:window_count . ') ' : ''
-
     " Add file name.
     let l:window_number = tabpagewinnr(a:n)
     let l:file_name = fnamemodify(bufname(l:buffer_list[l:window_number - 1]), ':t')
-    let l:tabLabel .= empty(l:file_name) ? '[No Name]' : l:file_name
+    let l:tabLabel .= ' ' .. (empty(l:file_name) ? '[No Name]' : l:file_name)
 
     if len(l:tabLabel) > a:tabLabelSize
         let l:tabLabel = strpart(l:tabLabel, 0, 8)
-        \    . '~'
-        \    . strpart(l:tabLabel, len(l:tabLabel) - a:tabLabelSize + 10)
+            \ .. '~'
+            \ .. strpart(l:tabLabel, len(l:tabLabel) - a:tabLabelSize + 10)
     endif
 
     return l:tabLabel
