@@ -11,7 +11,7 @@ scriptencoding utf-8
 set encoding=utf-8
 
 " Path is hardcoded because Neovim uses the same configuration.
-let $VIM_CONFIG_PATH=system('echo -n "${HOME}/.vim/vimrc"')
+let $VIM_CONFIG_PATH= expand('$HOME') . '/.vim/vimrc'
 
 " =========
 " Functions
@@ -404,7 +404,7 @@ if has('gui_running') && !has('nvim')
     endif
 
     set guioptions-=e " Hide tab line.
-    " set guioptions-=m " Hide menu.
+    set guioptions-=m " Hide menu.
     set guioptions-=T " Hide toolbar.
     set guioptions-=r " Hide scrollbar.
 endif
