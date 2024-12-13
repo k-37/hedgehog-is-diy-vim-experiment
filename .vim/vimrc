@@ -11,7 +11,7 @@ scriptencoding utf-8
 set encoding=utf-8
 
 " Path is hardcoded because Neovim uses the same configuration.
-let $VIM_CONFIG_PATH= expand('$HOME') . '/.vim/vimrc'
+let $VIM_CONFIG_PATH= expand('$HOME') .. '/.vim/vimrc'
 
 " =========
 " Functions
@@ -146,8 +146,8 @@ endfunction
 " =====
 
 function <SID>SearchNetrw(fname) abort
-    if ! search('\V\^' . a:fname . '\$')
-        call search('^' . substitute(a:fname, '\w\zs.*', '', '') . '.*\/\@<!$')
+    if ! search('\V\^' .. a:fname .. '\$')
+        call search('^' .. substitute(a:fname, '\w\zs.*', '', '') .. '.*\/\@<!$')
     endif
 endfunction
 
@@ -158,13 +158,13 @@ let g:custom_fzf_command_options = '--expect=ctrl-t,ctrl-x,ctrl-v --reverse --mu
 
 function <SID>FZF() abort
     if has('nvim')
-        execute 'FZF ' . g:custom_fzf_command_options
+        execute 'FZF ' .. g:custom_fzf_command_options
     else
         let l:tempname = tempname()
         execute 'silent !fzf ' g:custom_fzf_command_options
-        \    . ' | awk ''{ print $1":1:0" }'' > ' . fnameescape(l:tempname)
+        \    .. ' | awk ''{ print $1":1:0" }'' > ' .. fnameescape(l:tempname)
         try
-            execute 'cfile ' . l:tempname
+            execute 'cfile ' .. l:tempname
             redraw!
         finally
             call delete(l:tempname)
@@ -200,16 +200,16 @@ function <SID>RG(args) abort
     endif
     if has('nvim')
         call fzf#run(fzf#wrap({
-        \   'source': l:searchcommand . fzf#shellescape(l:pattern),
+        \   'source': l:searchcommand .. fzf#shellescape(l:pattern),
         \   'sinklist': function('s:RgHandler'),
         \   'options': g:custom_fzf_command_options
         \}))
     else
         let l:tempname = tempname()
-        execute 'silent !' . l:searchcommand . '''' . l:pattern . ''''
-        \    . ' | fzf ' . g:custom_fzf_command_options . ' > ' . fnameescape(l:tempname)
+        execute 'silent !' .. l:searchcommand .. '''' .. l:pattern .. ''''
+        \    .. ' | fzf ' .. g:custom_fzf_command_options .. ' > ' .. fnameescape(l:tempname)
         try
-            execute 'cfile ' . l:tempname
+            execute 'cfile ' .. l:tempname
             redraw!
         finally
             call delete(l:tempname)
@@ -283,7 +283,7 @@ if has("autocmd")
         " overwritten using the default definition.
         autocmd VimEnter * com! -nargs=* -bar -bang -count=0 -complete=dir Explore
             \ execute "call netrw#Explore(<count>,0,0+<bang>0,<q-args>)"
-            \ . ' | call <SID>SearchNetrw(' . string(expand('%:t')) . ')'
+            \ .. ' | call <SID>SearchNetrw(' .. string(expand('%:t')) .. ')'
     augroup END
 
     augroup netrw_mapping
@@ -445,7 +445,7 @@ command! -range=% -nargs=0 -bar Reverse <line1>,<line2>global/^/move <line1>-1 |
 " It works by adding random number and space to start of the line, sorting by number,
 " and removing what was added.
 command! -range=% -nargs=0 -bar Shuffle :silent!
-    \ <line1>,<line2>s/^/\=reltimestr(reltime())[-1:] . " "/
+    \ <line1>,<line2>s/^/\=reltimestr(reltime())[-1:] .. " "/
     \ |<line1>,<line2>sort n
     \ |<line1>,<line2>s/^\S* //
     \ |nohlsearch
@@ -747,9 +747,9 @@ endif
 
 " Krusader.
 if has('nvim')
-    nmap <Leader>ek :call jobstart("krusader --left '" . expand("%:p:h") . "'")<CR>
+    nmap <Leader>ek :call jobstart("krusader --left '" .. expand("%:p:h") .. "'")<CR>
 else
-    nmap <Leader>ek :call system("krusader --left '" . expand("%:p:h") . "' &")<CR>
+    nmap <Leader>ek :call system("krusader --left '" .. expand("%:p:h") .. "' &")<CR>
 endif
 
 " Misc
