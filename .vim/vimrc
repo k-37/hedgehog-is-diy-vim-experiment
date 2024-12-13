@@ -157,28 +157,16 @@ endfunction
 let g:custom_fzf_command_options = '--expect=ctrl-t,ctrl-x,ctrl-v --reverse --multi'
 
 function <SID>FZF() abort
-    if has('nvim')
-        execute 'FZF ' .. g:custom_fzf_command_options
-    else
-        let l:tempname = tempname()
-        execute 'silent !fzf ' g:custom_fzf_command_options
-        \    .. ' | awk ''{ print $1":1:0" }'' > ' .. fnameescape(l:tempname)
-        try
-            execute 'cfile ' .. l:tempname
-            redraw!
-        finally
-            call delete(l:tempname)
-        endtry
-    endif
+    execute 'FZF ' .. g:custom_fzf_command_options
 endfunction
 
 function <SID>Buffers() abort
     call fzf#run(fzf#wrap({
-    \   'source': reverse(<SID>BufferList()),
-    \   'sink': function('<SID>BufferOpen'),
-    \   'options': '--reverse',
-    \   'down': len(<SID>BufferList()) + 2
-    \}))
+        \ 'source': reverse(<SID>BufferList()),
+        \ 'sink': function('<SID>BufferOpen'),
+        \ 'options': '--reverse',
+        \ 'down': len(<SID>BufferList()) + 2
+    \ }))
 endfunction
 
 function! s:BufferList() abort
@@ -198,23 +186,11 @@ function <SID>RG(args) abort
     if len(a:args) > 0
         let l:pattern = a:args
     endif
-    if has('nvim')
-        call fzf#run(fzf#wrap({
-        \   'source': l:searchcommand .. fzf#shellescape(l:pattern),
-        \   'sinklist': function('s:RgHandler'),
-        \   'options': g:custom_fzf_command_options
-        \}))
-    else
-        let l:tempname = tempname()
-        execute 'silent !' .. l:searchcommand .. '''' .. l:pattern .. ''''
-        \    .. ' | fzf ' .. g:custom_fzf_command_options .. ' > ' .. fnameescape(l:tempname)
-        try
-            execute 'cfile ' .. l:tempname
-            redraw!
-        finally
-            call delete(l:tempname)
-        endtry
-    endif
+    call fzf#run(fzf#wrap({
+        \ 'source': l:searchcommand .. fzf#shellescape(l:pattern),
+        \ 'sinklist': function('s:RgHandler'),
+        \ 'options': g:custom_fzf_command_options
+    \ }))
 endfunction
 
 function! s:RgReturnSplit(line) abort
@@ -222,26 +198,28 @@ function! s:RgReturnSplit(line) abort
     " <file_name>:<line_number>:<column>:<context>
     let parts = split(a:line, ':')
     return {
-    \    'filename': parts[0],
-    \    'lnum': parts[1],
-    \    'col': parts[2],
-    \    'text': join(parts[3:], ':')
-    \}
+        \ 'filename': parts[0],
+        \ 'lnum': parts[1],
+        \ 'col': parts[2],
+        \ 'text': join(parts[3:], ':')
+    \ }
 endfunction
 
 function! s:RgHandler(lines) abort
     " First line is reserved for command e.g. `ctrl-t`.
     if len(a:lines) < 2 | return | endif
 
-    let cmd = get({'ctrl-x': 'split',
-                 \ 'ctrl-v': 'vertical split',
-                 \ 'ctrl-t': '$tabe'}, a:lines[0], 'edit')
+    let cmd = get({
+        \ 'ctrl-x': 'split',
+        \ 'ctrl-v': 'vertical split',
+        \ 'ctrl-t': '$tabe'
+    \ }, a:lines[0], 'edit')
     let list = map(a:lines[1:], 's:RgReturnSplit(v:val)')
 
     for item in list
         execute cmd escape(item.filename, ' %#\')
         execute item.lnum
-        execute 'normal!' item.col.'|zz'
+        execute 'normal!' .. item.col .. '|zz'
     endfor
 endfunction
 
