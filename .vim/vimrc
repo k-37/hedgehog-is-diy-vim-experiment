@@ -5,10 +5,10 @@
 " Skip initialization for `vim-tiny` or `vim-small`.
 if !1 | finish | endif
 
+" `compatible` is disabled.
 if &compatible | set nocompatible | endif
 
 scriptencoding utf-8
-set encoding=utf-8
 
 " Path is hardcoded because Neovim uses the same configuration.
 let $VIM_CONFIG_PATH= expand('$HOME') .. '/.vim/vimrc'
@@ -803,6 +803,8 @@ set breakindent " Preserve indentation in wrapped text (local to window).
 " include `uhex` to show unprintable characters as a hex number.
 set display=lastline,uhex
 
+set fillchars= " Characters to use for the status line, folds and filler lines.
+
 set list " Show `<Tab>` as `^I` and end-of-line as `$` (local to window).
 
 " List of strings used for list mode.
@@ -865,6 +867,8 @@ set ruler " Show the cursor position all the time.
 
 set showcmd " Display incomplete commands.
 
+set belloff=all " Do not ring the bell for these reasons.
+
 " 12. selecting text
 " ------------------
 
@@ -877,6 +881,13 @@ set clipboard+=unnamedplus,unnamed
 
 " What special keys can do: `startsel` and/or `stopsel`.
 set keymodel=startsel,stopsel
+
+" 13. editing text
+" ----------------
+
+set backspace=indent,eol,start " Specifies what `<BS>`, `CTRL-W`, etc. can do in Insert mode.
+
+set formatoptions+=jcroql " List of flags that tell how automatic formatting works.
 
 " 14. tabs and indenting
 " ----------------------
@@ -925,6 +936,11 @@ set wildignorecase " Ignore case when completing file names.
 if executable('rg')
     set grepprg=rg\ --vimgrep\ --hidden\ --smart-case
 endif
+
+" 24. multi-byte characters
+" -------------------------
+
+set encoding=utf-8 " Character encoding used internally.
 
 " =======
 " Plugins
