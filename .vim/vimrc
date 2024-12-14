@@ -306,7 +306,7 @@ if has("autocmd")
         autocmd InsertEnter * set timeoutlen=0
         autocmd InsertLeave * highlight CursorLine term=NONE cterm=NONE gui=NONE
             \ ctermbg=08 guibg=#666666
-        autocmd InsertLeave * execute "set timeoutlen=".s:default_timeoutlen
+        autocmd InsertLeave * execute "set timeoutlen=" .. s:default_timeoutlen
     augroup END
 
     " Overrides for desert colorscheme.
@@ -752,6 +752,7 @@ vnoremap > >gv
 " `CTRL-U` in insert mode deletes a lot.
 " Use `CTRL-G u` to first break undo (`:h i_CTRL-G_u`), so that you can undo `CTRL-U`.
 inoremap <C-U> <C-G>u<C-U>
+inoremap <C-W> <C-G>u<C-W>
 
 " Options (listed with `:options` command)
 " ========================================
@@ -840,6 +841,8 @@ set statusline=%!SetStatusLine()
 
 set hidden " Don't unload a buffer when no longer shown in a window.
 
+set switchbuf=uselast " Which window to use when jumping to a buffer.
+
 set splitbelow " When on, splitting a window will put the new window below the current one.
 
 " When on, splitting a window will put the new window right of the current one.
@@ -849,6 +852,8 @@ set splitright
 " ---------------------
 
 set showtabline=2 " Always show tab pages line.
+
+set tabpagemax=50 " Maximum number of tab pages to open for `-p` and `tab all`.
 
 " Alternate format to be used for a tab line.
 set tabline=%!SetTabLine()
@@ -927,9 +932,15 @@ set shiftround
 " 17. mapping
 " -----------
 
-" Time in msec for `timeout`, default timeout is 1000ms, see `:help timeoutlen`.
+set timeout " Allow timing out halfway into a mapping.
+
+" Time in msec for `timeout` into a mapping, default timeout is 1000ms, see `:h timeoutlen`.
 let s:default_timeoutlen=13337
-execute "set timeoutlen=".s:default_timeoutlen
+execute "set timeoutlen=" .. s:default_timeoutlen
+
+set ttimeout " Allow timing out halfway into a key code.
+
+set ttimeoutlen=50 " Time in msec for `timeout` into a key code.
 
 " 18. reading and writing files
 " -----------------------------
@@ -969,9 +980,28 @@ set encoding=utf-8 " Character encoding used internally.
 " List of words that specifies what to put in a session file.
 set sessionoptions=blank,buffers,curdir,folds,help,tabpages,winsize
 
+" List of words that specifies what to save for `:mkview`.
+set viewoptions=folds,cursor,curdir
+
 " =======
 " Plugins
 " =======
+
+" man.vim (first party plugin)
+" ============================
+
+" Load plugin.
+" ------------
+
+runtime ftplugin/man.vim
+
+" matchit (first party plugin)
+" ============================
+
+" Load plugin.
+" ------------
+
+packadd! matchit
 
 " Netrw (first party plugin)
 " ==========================
