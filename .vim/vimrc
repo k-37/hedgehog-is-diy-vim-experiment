@@ -86,25 +86,28 @@ function! SetTabLine() abort
 endfunction
 
 function! SetTabLabel(n, tabLabelSize)
-    let l:tabLabel  = ''
+    let l:tabLabel = ''
+    let l:tabLabelIndicators = ''
     let l:buffer_list = tabpagebuflist(a:n)
 
     " Add count of windows (panes) in the tab.
     let l:window_count = tabpagewinnr(a:n, '$')
-    let l:tabLabel .= l:window_count > 1 ? l:window_count : ''
+    let l:tabLabelIndicators .= l:window_count > 1 ? l:window_count : ''
 
     " Add indicator if one of the buffers in the tab page is modified.
     for buffer_number in l:buffer_list
         if getbufvar(buffer_number, "&modified")
-            let l:tabLabel .= '+'
+            let l:tabLabelIndicators .= '+'
             break
         endif
     endfor
 
+    let  l:tabLabel .= len(l:tabLabelIndicators) > 0 ? l:tabLabelIndicators .. ' ' : ''
+
     " Add file name.
     let l:window_number = tabpagewinnr(a:n)
     let l:file_name = fnamemodify(bufname(l:buffer_list[l:window_number - 1]), ':t')
-    let l:tabLabel .= ' ' .. (empty(l:file_name) ? '[No Name]' : l:file_name)
+    let l:tabLabel .= (empty(l:file_name) ? '[No Name]' : l:file_name)
 
     if len(l:tabLabel) > a:tabLabelSize
         let l:tabLabel = strpart(l:tabLabel, 0, 8)
