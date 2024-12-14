@@ -763,6 +763,9 @@ let c_comment_strings=1 " Highlighting strings inside C comments.
 " 2. moving around, searching and patterns
 " ----------------------------------------
 
+" Many jump commands move the cursor to the first non-blank character of a line.
+set nostartofline
+
 " `path` is a list of directory names used for file searching (global or local to buffer),
 " `,` is separator,
 " `.` is directory relative to current file,
@@ -799,6 +802,10 @@ set linebreak " Wrap long lines at a character in `:h breakat` (local to window)
 
 set breakindent " Preserve indentation in wrapped text (local to window).
 
+set sidescroll=1 " Minimal number of columns to scroll horizontally.
+
+set sidescrolloff=5 " Minimal number of columns to keep left and right of the cursor.
+
 " Include `lastline` to show the last line even if it doesn't fit,
 " include `uhex` to show unprintable characters as a hex number.
 set display=lastline,uhex
@@ -831,6 +838,8 @@ set laststatus=2 " Always show status line.
 " Alternate format to be used for a status line.
 set statusline=%!SetStatusLine()
 
+set hidden " Don't unload a buffer when no longer shown in a window.
+
 set splitbelow " When on, splitting a window will put the new window below the current one.
 
 " When on, splitting a window will put the new window right of the current one.
@@ -861,6 +870,8 @@ set mousemodel=popup_setpos
 " 11. messages and info
 " ---------------------
 
+set shortmess=filnxtToOF " List of flags to make messages shorter.
+
 set helplang=en " List of preferred languages for finding help.
 
 set ruler " Show the cursor position all the time.
@@ -889,18 +900,24 @@ set backspace=indent,eol,start " Specifies what `<BS>`, `CTRL-W`, etc. can do in
 
 set formatoptions+=jcroql " List of flags that tell how automatic formatting works.
 
+set nojoinspaces " Use two spaces after `.` when joining a line.
+
+set nrformats=bin,hex " Number formats recognized for `CTRL-A` and `CTRL-X` commands.
+
 " 14. tabs and indenting
 " ----------------------
-
-set autoindent
 
 set tabstop=4 " Number of spaces a `<Tab>` in the text stands for (local to buffer).
 
 set shiftwidth=4 " Number of spaces used for each step of (auto)indent (local to buffer).
 
+set smarttab " A `<Tab>` in an indent inserts `shiftwidth` spaces.
+
 set softtabstop=4 " If non-zero, number of spaces to insert for a `<Tab>` (local to buffer).
 
 set expandtab " Expand `<Tab>` to spaces in Insert mode (local to buffer).
+
+set autoindent " Automatically set the indent of a new line (local to buffer).
 
 set cindent " Enable specific indenting for C code.
 
@@ -920,8 +937,12 @@ execute "set timeoutlen=".s:default_timeoutlen
 " Automatically read a file when it was modified outside of Vim (global or local to buffer).
 set autoread
 
+set nofsync " Forcibly sync the file to disk after writing it.
+
 " 20. command line editing
 " ------------------------
+
+set history=10000 " How many command lines are remembered.
 
 set wildmenu " Command-line completion shows a list of matches.
 
@@ -941,6 +962,12 @@ endif
 " -------------------------
 
 set encoding=utf-8 " Character encoding used internally.
+
+" 25. various
+" -----------
+
+" List of words that specifies what to put in a session file.
+set sessionoptions=blank,buffers,curdir,folds,help,tabpages,winsize
 
 " =======
 " Plugins
