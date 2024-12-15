@@ -184,7 +184,7 @@ function! s:BufferOpen(e) abort
 endfunction
 
 function <SID>RG(args) abort
-    let l:searchcommand = 'rg --vimgrep --hidden --smart-case -- '
+    let l:searchcommand = 'rg --vimgrep --null --hidden --smart-case -- '
     let l:pattern = '.'
     if len(a:args) > 0
         let l:pattern = a:args
@@ -198,13 +198,16 @@ endfunction
 
 function! s:RgReturnSplit(line) abort
     " `rg` command returns:
-    " <file_name>:<line_number>:<column>:<context>
-    let parts = split(a:line, ':')
+    " <file_name>\x0<line_number>:<column>:<context>
+    let l:parts = split(a:line, '[\x0]')
+    let l:filename = l:parts[0]
+    let l:parts = split(l:parts[1], ':')
+
     return {
-        \ 'filename': parts[0],
-        \ 'lnum': parts[1],
-        \ 'col': parts[2],
-        \ 'text': join(parts[3:], ':')
+        \ 'filename': l:filename,
+        \ 'lnum': l:parts[0],
+        \ 'col': l:parts[1],
+        \ 'text': join(l:parts[2:], ':')
     \ }
 endfunction
 
