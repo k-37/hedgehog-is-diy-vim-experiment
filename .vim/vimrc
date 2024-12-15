@@ -606,6 +606,7 @@ nnoremap gk k
 
 " Apply macro which was recorded with `qq`.
 nnoremap <F4> @q
+nnoremap Q @q
 
 " Apply macro to visual selection.
 vnoremap <F4> :normal! @q<CR>
