@@ -32,7 +32,7 @@ On Debian/Ubuntu:
 - Use `-` to open directory browser and, `hjkl` to traverse file system.
 - Fuzzy find files with `<Space>ff`, find string in files with `<Space>fs`.
 
-Explore `./vim/vimrc` to find out more. 🦔
+Explore [`.vim/vimrc`](.vim/vimrc) to find out more. 🦔
 
 # FAQ
 
