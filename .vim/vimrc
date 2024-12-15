@@ -184,7 +184,7 @@ function! s:BufferOpen(e) abort
 endfunction
 
 function <SID>RG(args) abort
-    let l:searchcommand = 'rg --vimgrep --null --hidden --smart-case -- '
+    let l:searchcommand = 'rg --vimgrep --null --hidden --smart-case --glob "!.git/" --glob "!.tags" -- '
     let l:pattern = '.'
     if len(a:args) > 0
         let l:pattern = a:args
@@ -972,7 +972,7 @@ set wildignorecase " Ignore case when completing file names.
 
 " Configure the `:grep` command.
 if executable('rg')
-    set grepprg=rg\ --vimgrep\ --hidden\ --smart-case
+    set grepprg=rg\ --vimgrep\ --hidden\ --smart-case\ --glob\ \"!.git/\"\ --glob\ \"!.tags\"
 endif
 
 " 24. multi-byte characters
