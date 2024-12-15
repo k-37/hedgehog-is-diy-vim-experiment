@@ -10,7 +10,7 @@ if &compatible | set nocompatible | endif
 
 scriptencoding utf-8
 
-" Path is hardcoded because Neovim uses the same configuration.
+" Path is hard-coded because Neovim uses the same configuration.
 let $VIM_CONFIG_PATH= expand('$HOME') .. '/.vim/vimrc'
 
 " =========
@@ -249,7 +249,7 @@ if has("autocmd")
         " Check if any buffers were changed outside of Vim.
         autocmd FocusGained,BufEnter * :checktime
 
-        " Strip trailing whitespace on save for all files.
+        " Strip trailing white space on save for all files.
         " For only some file types use:
         " autocmd FileType c,cpp,java,php,ruby,python autocmd BufWritePre <buffer>
         "     \ :call <SID>StripTrailingWhitespaces()
@@ -287,7 +287,7 @@ if has("autocmd")
         " Toggle the dotfiles.
         autocmd FileType netrw nmap <buffer> . gh
 
-        " Close the preview window which was oppened with `p`.
+        " Close the preview window which was opened with `p`.
         autocmd FileType netrw nmap <buffer> P <C-W>z
 
         " Create a file.
@@ -377,7 +377,7 @@ if !has('gui_running') && &term =~ '\%(screen\|tmux\)'
 endif
 colorscheme desert
 set t_Co=256 " Enable 256 colors.
-set termguicolors " Enable GUI colors for the terminal to get truecolor.
+set termguicolors " Enable GUI colors for the terminal to get true color.
 
 " GUI
 " ===
@@ -413,7 +413,7 @@ syntax on " Switch syntax highlighting on.
 command! DiffOrig aboveleft vnew | set buftype=nofile | read ++edit #
     \ | 0d_ | diffthis | wincmd p | diffthis
 
-" Executes system `ctags` command which recursively generates tags from current dir.
+" Executes system `ctags` command which recursively generates tags from current directory.
 " Sending `stdout` and `stderr` to `/dev/null` prevents output from appearing in the buffer
 " and stopping tag generation on warnings.
 command! MakeTags silent !ctags -f .tags -R . &>/dev/null &
@@ -597,7 +597,7 @@ inoremap <C-M-k> <Esc>:move .-2<CR>==gi
 vnoremap <C-M-j> :move '>+1<CR>gv=gv
 vnoremap <C-M-k> :move '<-2<CR>gv=gv
 
-" Move inside of displayed (word wraped) line.
+" Move inside of displayed (word wrapped) line.
 nnoremap j gj
 nnoremap k gk
 nnoremap gj j
