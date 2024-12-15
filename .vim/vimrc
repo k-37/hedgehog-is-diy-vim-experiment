@@ -304,12 +304,14 @@ if has("autocmd")
     augroup cursor_line
         autocmd!
 
-        autocmd InsertEnter * highlight CursorLine term=NONE cterm=NONE gui=NONE
-            \ ctermbg=89 guibg=#87005f
         autocmd InsertEnter * set timeoutlen=0
-        autocmd InsertLeave * highlight CursorLine term=NONE cterm=NONE gui=NONE
-            \ ctermbg=08 guibg=#666666
         autocmd InsertLeave * execute "set timeoutlen=" .. s:default_timeoutlen
+
+        autocmd ColorScheme * highlight CursorLine term=NONE cterm=NONE gui=NONE
+        autocmd InsertEnter *
+            \ highlight CursorLine term=underline cterm=underline gui=underline
+        autocmd InsertLeave *
+            \ highlight CursorLine term=NONE cterm=NONE gui=NONE
     augroup END
 
     " Overrides for desert colorscheme.
