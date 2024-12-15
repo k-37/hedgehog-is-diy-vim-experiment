@@ -1022,7 +1022,9 @@ let g:netrw_list_hide = '\(^\|\s\s\)\zs\.\S\+' " Hide dotfiles.
 
 let g:netrw_liststyle = 0 " Thin listing (one file per line).
 
-let g:netrw_banner = 0 " To show banner temporarely use `I` inside Netrw.
+let g:netrw_banner = 0 " To show banner temporarily use `I` inside Netrw.
+
+let g:netrw_sort_options='i' " Case insensitive sort.
 
 " FZF.vim (part of `fzf` binary package), NOT same as https://github.com/junegunn/fzf.vim
 " =======================================================================================
