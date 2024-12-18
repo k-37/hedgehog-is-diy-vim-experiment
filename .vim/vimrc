@@ -392,7 +392,16 @@ if has('gui_running') && !has('nvim')
     set guioptions-=e " Hide tab line.
     set guioptions-=m " Hide menu.
     set guioptions-=T " Hide toolbar.
-    set guioptions-=r " Hide scrollbar.
+    set guioptions-=r " Hide right-hand scrollbar.
+    set guioptions-=l " Hide left-hand scrollbar.
+    set guioptions-=b " Hide bottom scrollbar.
+    " Keep the GUI window size when adding/removing a scrollbar, or toolbar, tabline, etc..
+    set guioptions+=k
+
+    " Set default window size and position.
+    set lines=52
+    set columns=98
+    winpos 0 0
 endif
 
 " Commands
@@ -746,6 +755,12 @@ endif
 
 " Misc
 " ----
+
+if has('gui_running') && !has('nvim')
+    " Toggle GUI menu.
+    nnoremap <Leader>mgm :if &guioptions=~'m'<Bar>set guioptions-=m<Bar>
+        \ else<Bar>set guioptions+=m<Bar>endif<CR>
+endif
 
 " Stop highlighting of items found by search (modify highlighting).
 nnoremap <Leader>mh :noh<CR>
