@@ -1,6 +1,8 @@
 # Introduction
 
-This project explores creating [Vim](https://www.vim.org/) and [Neovim](https://neovim.io/) configuration with minimal third party dependencies. 🦔
+This project explores creating [Vim](https://www.vim.org/) configuration with minimal third party dependencies. The configuration can also be used with [Neovim](https://neovim.io/).
+
+🦔
 
 # Requirements
 
@@ -14,7 +16,7 @@ On Debian/Ubuntu:
 # Design goals
 
 - Share the same configuration between [Vim](https://www.vim.org/) and [Neovim](https://neovim.io/) to have the best from both worlds.
-- Configure Vim as powerful, simple and fast text editor, don't force IDE like functionality.
+- Configure Vim as minimalistic, powerful, flexible and fast text editor, don't force IDE like functionality.
 - Don't split `vimrc` to multiple files, and keep configuration easier to manage.
 - Go heavy on documenting everything.
 - Stay vanilla as much as possible, only use first party plugins (e.g. `Netrw`) and plugins distributed with binary packages (e.g. `fzf`).
