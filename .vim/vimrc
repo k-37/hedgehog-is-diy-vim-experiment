@@ -127,9 +127,9 @@ function <SID>PasteInNormalMode() abort
     let l:cursor_column = col(".")
     let l:last_column_of_a_row = col("$") - 1
     if l:cursor_column >= l:last_column_of_a_row
-        execute 'normal p'
+        execute 'normal "+p'
     else
-        execute 'normal P'
+        execute 'normal "+P'
     endif
 endfunction
 
@@ -139,9 +139,9 @@ function <SID>PasteInInsertMode() abort
     if l:cursor_column == l:end_of_the_cursor_line
         " `<C-O>` exits Insert mode and executes one command in Normal mode before
         " returning to Insert mode (`:h i_CTRL-O`).
-        return "\<C-O>\p"
+        return "\<C-O>\"+p"
     else
-        return "\<C-O>\P"
+        return "\<C-O>\"+P"
     endif
 endfunction
 
@@ -462,14 +462,14 @@ nnoremap <Leader>mm :MakeTags<CR>
 " ---------
 
 " Copy.
-nnoremap <C-Insert> y
-vnoremap <C-Insert> y
+nnoremap <C-Insert> "+y
+vnoremap <C-Insert> "+y
 
 " Paste.
-vnoremap <S-Insert> p
+vnoremap <S-Insert> "+p
 
 " It is not possible to paste before last character,
-" in Normal mode use `p` or `P` to do that.
+" in Normal mode use `"+p` or `"+P` to do that.
 nnoremap <S-Insert> :call <SID>PasteInNormalMode()<CR>
 
 " We use `<C-R>` and call the function to get Insert mode cursor position
@@ -477,12 +477,14 @@ nnoremap <S-Insert> :call <SID>PasteInNormalMode()<CR>
 inoremap <S-Insert> <C-R>=<SID>PasteInInsertMode()<CR>
 
 " Paste clipboard register to command line.
-cnoremap <S-Insert> <C-R>*
+cnoremap <S-Insert> <C-R>+
 
+" Paste to terminal window like one used by `fzf`.
 if has('nvim')
-    " Paste to terminal window like one used by `fzf`.
     " `<C-\><C-N>` enters Normal mode in terminal.
     tnoremap <expr> <S-Insert> '<C-\><C-N>pi'
+else
+    tnoremap <S-Insert> <C-w>"+
 endif
 
 " Files
@@ -721,6 +723,9 @@ nnoremap <Leader>dw :execute (100 - g:netrw_winsize).'Lexplore'<CR>
 " Terminal
 " --------
 
+" In Vim use `<C-W><S-N>` to switch to Normal mode in terminal window,
+" use `i` to return to Insert mode.
+
 if has('nvim')
     " Switch to Normal mode in terminal window, use `i` to return to Insert mode.
     tnoremap <C-W> <C-\><C-N><C-W>
@@ -897,9 +902,16 @@ set belloff=all " Do not ring the bell for these reasons.
 " When to start Select mode instead of Visual mode: `mouse`, `key` and/or `cmd`.
 set selectmode=
 
-" `unnamed` to use the `*` register like unnamed register,
-" `unnamedplus` variant of the `unnamed` flag which uses the clipboard register `+`.
-set clipboard+=unnamedplus,unnamed
+" Commands such as `:yank` or `:put` normally operate with the unnamed register `""`.
+" Set `unnamed` flag to use the `*` register like unnamed register, then yank,
+" delete, change and put operations which would normally go to the unnamed
+" register will use the clipboard register `"*` instead, which is the `PRIMARY` buffer in X.
+" `unnamedplus` is variant of the `unnamed` flag which uses the clipboard register `+`.
+" The `"+` clipboard register corresponds to the `CLIPBOARD` buffer in X.
+" If `unnamedplus,unnamed` is used then yank operations will also copy the
+" yanked text to `"*` register in addition to the `"+` register (however,
+" delete, change and put operation will still only operate on the `"+` register)
+set clipboard+=unnamedplus
 
 " What special keys can do: `startsel` and/or `stopsel`.
 set keymodel=startsel,stopsel
