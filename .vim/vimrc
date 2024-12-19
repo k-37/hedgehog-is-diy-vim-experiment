@@ -300,20 +300,6 @@ if has("autocmd")
         autocmd FileType netrw nmap <buffer> fd D
     augroup END
 
-    " Highlight current line on entering Insert mode.
-    augroup cursor_line
-        autocmd!
-
-        autocmd InsertEnter * set timeoutlen=0
-        autocmd InsertLeave * execute "set timeoutlen=" .. s:default_timeoutlen
-
-        autocmd ColorScheme * highlight CursorLine term=NONE cterm=NONE gui=NONE
-        autocmd InsertEnter *
-            \ highlight CursorLine term=underline cterm=underline gui=underline
-        autocmd InsertLeave *
-            \ highlight CursorLine term=NONE cterm=NONE gui=NONE
-    augroup END
-
     " Overrides for desert colorscheme.
     augroup desert_override
         autocmd!
@@ -381,6 +367,13 @@ set termguicolors " Enable GUI colors for the terminal to get true color.
 
 " GUI
 " ===
+
+if has('gui_running')
+    " Disable cursor blinking in Normal mode.
+    set guicursor+=n:blinkon0
+    " Blink cursor in Insert mode to help us notice that we are not in Normal mode.
+    set guicursor+=i:ver37-blinkwait750-blinkon250-blinkoff250
+endif
 
 if has('gui_running') && !has('nvim')
     if has('gui_gtk3')
