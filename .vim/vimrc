@@ -690,6 +690,7 @@ inoremap [ []<C-G>U<Left>
 inoremap < <><C-G>U<Left>
 inoremap " ""<C-G>U<Left>
 inoremap ` ``<C-G>U<Left>
+inoremap * **<C-G>U<Left>
 " Mapping for `'` is not defined intentionally because it is often used without a pair.
 
 " Surround visual selection.
@@ -700,6 +701,7 @@ vnoremap <Leader>< <Esc>`<i<<Esc>`><Right>a><Esc>
 vnoremap <Leader>" <Esc>`<i"<Esc>`><Right>a"<Esc>
 vnoremap <Leader>' <Esc>`<i'<Esc>`><Right>a'<Esc>
 vnoremap <Leader>` <Esc>`<i`<Esc>`><Right>a`<Esc>
+vnoremap <Leader>* <Esc>`<i*<Esc>`><Right>a*<Esc>
 
 " Delete surround of visual selection. When delete is done at the end of the
 " line cursor will not be at the end of previously selected text.
@@ -713,6 +715,7 @@ vnoremap <Leader>r< <Esc>`<r<<Esc>`>r><Esc>
 vnoremap <Leader>r" <Esc>`<r"<Esc>`>r"<Esc>
 vnoremap <Leader>r' <Esc>`<r'<Esc>`>r'<Esc>
 vnoremap <Leader>r` <Esc>`<r`<Esc>`>r`<Esc>
+vnoremap <Leader>r* <Esc>`<r*<Esc>`>r*<Esc>
 
 " Netrw
 " -----
@@ -842,7 +845,7 @@ set fillchars= " Characters to use for the status line, folds and filler lines.
 set list " Show `<Tab>` as `^I` and end-of-line as `$` (local to window).
 
 " List of strings used for list mode.
-set listchars=tab:>-,trail:-,nbsp:+,space:·,precedes:<,extends:>
+set listchars=tab:>-,trail:-,nbsp:+,multispace:·,precedes:<,extends:>
 
 set number " Show the line number for each line (local to window).
 
@@ -901,7 +904,7 @@ set mousemodel=popup_setpos
 " 11. messages and info
 " ---------------------
 
-set shortmess=filnxtToOF " List of flags to make messages shorter.
+set shortmess=filnxtToOFI " List of flags to make messages shorter.
 
 set helplang=en " List of preferred languages for finding help.
 
@@ -926,7 +929,7 @@ set selectmode=
 " If `unnamedplus,unnamed` is used then yank operations will also copy the
 " yanked text to `"*` register in addition to the `"+` register (however,
 " delete, change and put operation will still only operate on the `"+` register)
-set clipboard+=unnamedplus
+set clipboard^=unnamedplus,unnamed
 
 " What special keys can do: `startsel` and/or `stopsel`.
 set keymodel=startsel,stopsel
@@ -994,6 +997,11 @@ set wildmode=full " Specifies how command line completion works.
 
 set wildignorecase " Ignore case when completing file names.
 
+if !has('nvim')
+    " A list of words that change how command line completion is done.
+    set wildoptions=pum,tagfile,fuzzy
+endif
+
 " 22. running make and jumping to errors (quickfix)
 " -------------------------------------------------
 
@@ -1015,6 +1023,9 @@ set sessionoptions=blank,buffers,curdir,folds,help,tabpages,winsize
 
 " List of words that specifies what to save for `:mkview`.
 set viewoptions=folds,cursor,curdir
+
+" Disable viminfo `:h viminfo`.
+set viminfofile=NONE
 
 " =======
 " Plugins
