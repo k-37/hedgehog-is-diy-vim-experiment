@@ -386,7 +386,9 @@ if has('gui_running') && !has('nvim')
     set guioptions-=m " Hide menu.
     set guioptions-=T " Hide toolbar.
     set guioptions-=r " Hide right-hand scrollbar.
+    set guioptions-=R " Hide right-hand scrollbar when there is a vertically split window.
     set guioptions-=l " Hide left-hand scrollbar.
+    set guioptions-=L " Hide left-hand scrollbar when there is a vertically split window.
     set guioptions-=b " Hide bottom scrollbar.
     " Keep the GUI window size when adding/removing a scrollbar, or toolbar, tabline, etc..
     set guioptions+=k
@@ -894,7 +896,7 @@ set mouse=a " Enable the use of the mouse.
 " What the right mouse button is used for: `extend`, `popup` or `popup_setpos`.
 set mousemodel=popup_setpos
 
-" 11. messages and info
+" 12. messages and info
 " ---------------------
 
 set shortmess=filnxtToOFI " List of flags to make messages shorter.
@@ -907,7 +909,7 @@ set showcmd " Display incomplete commands.
 
 set belloff=all " Do not ring the bell for these reasons.
 
-" 12. selecting text
+" 13. selecting text
 " ------------------
 
 " When to start Select mode instead of Visual mode: `mouse`, `key` and/or `cmd`.
@@ -927,7 +929,7 @@ set clipboard^=unnamedplus,unnamed
 " What special keys can do: `startsel` and/or `stopsel`.
 set keymodel=startsel,stopsel
 
-" 13. editing text
+" 14. editing text
 " ----------------
 
 set backspace=indent,eol,start " Specifies what `<BS>`, `CTRL-W`, etc. can do in Insert mode.
@@ -938,7 +940,7 @@ set nojoinspaces " Use two spaces after `.` when joining a line.
 
 set nrformats=bin,hex " Number formats recognized for `CTRL-A` and `CTRL-X` commands.
 
-" 14. tabs and indenting
+" 15. tabs and indenting
 " ----------------------
 
 set tabstop=4 " Number of spaces a `<Tab>` in the text stands for (local to buffer).
@@ -958,7 +960,7 @@ set cindent " Enable specific indenting for C code.
 " Round to `shiftwidth` for `<<` and `>>`. When at 3 spaces, and `>` is hit go to 4, not 7.
 set shiftround
 
-" 17. mapping
+" 18. mapping
 " -----------
 
 set timeout " Allow timing out halfway into a mapping.
@@ -971,7 +973,7 @@ set ttimeout " Allow timing out halfway into a key code.
 
 set ttimeoutlen=50 " Time in msec for `timeout` into a key code.
 
-" 18. reading and writing files
+" 19. reading and writing files
 " -----------------------------
 
 " Automatically read a file when it was modified outside of Vim (global or local to buffer).
@@ -979,7 +981,18 @@ set autoread
 
 set nofsync " Forcibly sync the file to disk after writing it.
 
-" 20. command line editing
+" 20. the swap file
+" -----------------
+
+if !has('nvim')
+    " List of directories for the swap file.
+    " If a directory ends in two path separators (e.g. `//`), the swap file
+    " name will be built from the complete path to the file with all path
+    " separators substituted to `%` signs. This will ensure file name uniqueness.
+    set directory=~/.vim/swapfiles//
+endif
+
+" 21. command line editing
 " ------------------------
 
 set history=10000 " How many command lines are remembered.
@@ -995,7 +1008,7 @@ if !has('nvim')
     set wildoptions=pum,tagfile,fuzzy
 endif
 
-" 22. running make and jumping to errors (quickfix)
+" 23. running make and jumping to errors (quickfix)
 " -------------------------------------------------
 
 " Configure the `:grep` command.
@@ -1003,12 +1016,12 @@ if executable('rg')
     set grepprg=rg\ --vimgrep\ --hidden\ --smart-case\ --glob\ \"!.git/\"\ --glob\ \"!.tags\"
 endif
 
-" 24. multi-byte characters
+" 25. multi-byte characters
 " -------------------------
 
 set encoding=utf-8 " Character encoding used internally.
 
-" 25. various
+" 26. various
 " -----------
 
 " List of words that specifies what to put in a session file.
