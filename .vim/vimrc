@@ -2,12 +2,6 @@
 " Initialization
 " ==============
 
-" Skip initialization for `vim-tiny` or `vim-small`.
-if !1 | finish | endif
-
-" `compatible` is disabled.
-if &compatible | set nocompatible | endif
-
 scriptencoding utf-8
 
 " Path is hard-coded because Neovim uses the same configuration.
@@ -697,6 +691,7 @@ vnoremap <Leader>" <Esc>`<i"<Esc>`><Right>a"<Esc>
 vnoremap <Leader>' <Esc>`<i'<Esc>`><Right>a'<Esc>
 vnoremap <Leader>` <Esc>`<i`<Esc>`><Right>a`<Esc>
 vnoremap <Leader>* <Esc>`<i*<Esc>`><Right>a*<Esc>
+vnoremap <Leader>, <Esc>`<i,<Esc>`><Right>a,<Esc>
 
 " Delete surround of visual selection. When delete is done at the end of the
 " line cursor will not be at the end of previously selected text.
@@ -711,6 +706,7 @@ vnoremap <Leader>r" <Esc>`<r"<Esc>`>r"<Esc>
 vnoremap <Leader>r' <Esc>`<r'<Esc>`>r'<Esc>
 vnoremap <Leader>r` <Esc>`<r`<Esc>`>r`<Esc>
 vnoremap <Leader>r* <Esc>`<r*<Esc>`>r*<Esc>
+vnoremap <Leader>r, <Esc>`<r,<Esc>`>r,<Esc>
 
 " Netrw
 " -----
@@ -955,7 +951,7 @@ set expandtab " Expand `<Tab>` to spaces in Insert mode (local to buffer).
 
 set autoindent " Automatically set the indent of a new line (local to buffer).
 
-set cindent " Enable specific indenting for C code.
+set nocindent " Disable automatic C program indenting.
 
 " Round to `shiftwidth` for `<<` and `>>`. When at 3 spaces, and `>` is hit go to 4, not 7.
 set shiftround
