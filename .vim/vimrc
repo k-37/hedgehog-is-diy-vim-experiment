@@ -2,6 +2,12 @@
 " Initialization
 " ==============
 
+" Disable Vi-compatible mode, i.e. make Vim behave in a more useful way.
+set nocompatible
+
+" Skip initialization for `vim.tiny` or `vim.small` which might not support used features.
+if !has("eval") | finish | endif
+
 scriptencoding utf-8
 
 " Path is hard-coded because Neovim uses the same configuration.
