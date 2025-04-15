@@ -753,6 +753,20 @@ else
     nmap <Leader>ek :call system("krusader --left '" .. expand("%:p:h") .. "' &")<CR>
 endif
 
+" git-dag from Git Cola.
+if has('nvim')
+    nmap <Leader>egd :call jobstart("git-dag '" .. expand("%:p") .. "'")<CR>
+else
+    nmap <Leader>egd :call system("git-dag '" .. expand("%:p") .. "' &")<CR>
+endif
+
+" git gui blame.
+if has('nvim')
+    nmap <Leader>egb :call jobstart("git gui blame '" .. expand("%:p") .. "'")<CR>
+else
+    nmap <Leader>egb :call system("git gui blame '" .. expand("%:p") .. "' &")<CR>
+endif
+
 " Misc
 " ----
 
