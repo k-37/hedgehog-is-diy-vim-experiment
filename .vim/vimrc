@@ -33,6 +33,7 @@ function! SetStatusLine() abort
     let l:statusLine .= '%h'
     let l:statusLine .= '%w'
     let l:statusLine .= ' %y'
+    let l:statusLine .= ' %{&spelllang}=%{&spell}'
     let l:statusLine .= ' %{&fileformat}'
     let l:statusLine .= ' %{&fileencoding}'
     let l:statusLine .= ' | %b = %B'
@@ -380,6 +381,8 @@ if has('gui_running') && !has('nvim')
         set guifont=Hack\ 16
     elseif has('gui_win32')
         set guifont=Consolas:h16
+    elseif has('gui_macvim')
+        set guifont=Monaco:h22
     endif
 
     set guioptions-=e " Hide tab line.
@@ -509,6 +512,9 @@ nnoremap <Leader>fs :Rg<Space>
 " Buffers
 " -------
 
+" Edit a new, unnamed buffer.
+nnoremap <S-F4> :enew<CR>
+
 " List buffers which then can be opened with `:b <BUFFER_NUMBER>`.
 nnoremap <Leader>bl :buffers<CR>
 
@@ -521,7 +527,7 @@ nnoremap <C-S-M-l> :bnext<CR>
 
 " Switch to next buffer, unload and delete previous from the buffer list.
 nnoremap <Leader>bd :bnext<CR>:bdelete#<CR>
-nnoremap <S-F4> :bnext<CR>:bdelete#<CR>
+nnoremap <C-S-F4> :bnext<CR>:bdelete#<CR>
 
 " Tabs
 " ----
