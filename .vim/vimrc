@@ -749,6 +749,21 @@ if has('nvim')
     tnoremap <expr> <C-R> '<C-\><C-N>"'.nr2char(getchar()).'pi'
 endif
 
+" Transform current buffer's contents using shell commands
+" --------------------------------------------------------
+
+" `<Bar>` is used as pipe `|`, we could have also used `\|`.
+
+" `tr` is used to replace single quote with double quote which is valid for `json`.
+" `jq` is used to output pretty formatted `json`.
+nmap <Leader>cjq :%!tr "'" '"' <Bar> jq .<CR>
+
+" Encode current buffer's contents as base64 string.
+nmap <Leader>cb64e :%!base64<CR>
+
+" Decode current buffer's contents from base64 string.
+nmap <Leader>cb64d :%!base64 --decode<CR>
+
 " External applications
 " ---------------------
 
