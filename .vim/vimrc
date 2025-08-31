@@ -174,14 +174,23 @@ function <SID>Buffers() abort
 endfunction
 
 function! s:BufferList() abort
-    redir => ls
-    silent ls
+    redir => l:buffer_list
+    silent buffers
     redir END
-    return split(ls, '\n')
+
+    let l:buffer_list_extended = []
+    let l:buffer_list = split(l:buffer_list, '\n')
+    for line in l:buffer_list
+        let l:buffer_number = str2nr(matchstr(line, '^[ 0-9]*'))
+        let l:buffer_first_line = getbufoneline(bufnr(l:buffer_number), 1)
+        let l:buffer_list_extended += [line .. '   ' .. l:buffer_first_line]
+    endfor
+
+    return l:buffer_list_extended
 endfunction
 
-function! s:BufferOpen(e) abort
-    execute 'buffer' matchstr(a:e, '^[ 0-9]*')
+function! s:BufferOpen(selected_buffer_line) abort
+    execute 'buffer' matchstr(a:selected_buffer_line, '^[ 0-9]*')
 endfunction
 
 function <SID>RG(args) abort
@@ -429,6 +438,9 @@ command! -nargs=* Files call <SID>FZF()
 
 command! -nargs=* Buffers call <SID>Buffers()
 
+" Create scratch buffer.
+command! Scratch enew | setlocal bufhidden=wipe buftype=nofile noswapfile
+
 " Call as `:Rg <pattern>`.
 command! -nargs=* Rg call <SID>RG(<q-args>)
 
@@ -522,12 +534,15 @@ nnoremap <Leader>bl :buffers<CR>
 nnoremap <Leader>bf :Buffers<CR>
 
 " Move between buffers.
+nnoremap <Leader>bp :bprevious<CR>
 nnoremap <C-S-M-h> :bprevious<CR>
+
+nnoremap <Leader>bn :bnext<CR>
 nnoremap <C-S-M-l> :bnext<CR>
 
 " Switch to next buffer, unload and delete previous from the buffer list.
-nnoremap <Leader>bd :bnext<CR>:bdelete#<CR>
-nnoremap <C-S-F4> :bnext<CR>:bdelete#<CR>
+nnoremap <expr> <Leader>bd &modified ? ':echoe "Unwritten!!!"<CR>':':bnext<CR>:bdelete#<CR>'
+nnoremap <expr> <C-S-F4> &modified ? ':echoe "Unwritten!!!"<CR>':':bnext<CR>:bdelete#<CR>'
 
 " Tabs
 " ----
@@ -548,10 +563,10 @@ nnoremap <M-9> :tabnext 9<CR>
 nnoremap <M-0> :tabnext 10<CR>
 
 " Open tab, with the current buffer, at the end.
-nnoremap <Leader>tt :$tabnew<CR>:buffer#<CR>
+nnoremap <Leader>tt :$tab split<CR>
 
 " Open tab, with the current buffer, next to the current tab.
-nnoremap <Leader>tn :tabnew<CR>:buffer#<CR>
+nnoremap <Leader>tn :tab split<CR>
 
 " Delete tab.
 nnoremap <Leader>td :tabclose<CR>
