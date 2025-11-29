@@ -17,6 +17,35 @@ let $VIM_CONFIG_PATH= expand('$HOME') .. '/.vim/vimrc'
 " Functions
 " =========
 
+function <SID>SwapFileHandle() abort
+    " Don't do anything on Windows.
+    if !has('unix')
+        return
+    endif
+
+    " Check if any process has the swap file open.
+    let l:lsof_result = systemlist('lsof ' .. shellescape(v:swapname) .. ' 2>/dev/null')
+
+    if empty(lsof_result)
+        let v:swapchoice = 'r' " recover; swap file isn't in use by another Vim instance.
+    else
+        let v:swapchoice = 'e'
+        let g:swap_file_message = 'This file is also opened for editing in'
+            \ .. ' another Vim instance.'
+    endif
+endfunction
+
+function <SID>SwapFileMessage() abort
+    if empty(g:swap_file_message)
+        return
+    endif
+
+    echohl ModeMsg
+    echom g:swap_file_message
+    echohl None
+    let g:swap_file_message = ''
+endfunction
+
 function <SID>StripTrailingWhitespaces() abort
     let l:l = line(".")
     let l:c = col(".")
@@ -175,7 +204,7 @@ endfunction
 
 function! s:BufferList() abort
     redir => l:buffer_list
-    silent buffers
+        silent buffers
     redir END
 
     let l:buffer_list_extended = []
@@ -256,10 +285,27 @@ if has("autocmd")
         " Automatically reload configuration when modified.
         autocmd BufWritePost *vimrc,*exrc,*init.vim :call feedkeys(":source %\<CR>")
 
-        " Check if any buffers were changed outside of Vim.
+        " Check if any buffers were changed outside of current Vim instance.
+        "
+        " If multiple Vim instances edit the same file, which is changed and saved
+        " in one of them. Vim will auto reload file in another instance,
+        " if all of its changes are saved.
+        " If there are unsaved changes in another instance, Vim will prompt us what to do.
         autocmd FocusGained,BufEnter * :checktime
 
+        " Automatically decide what to do when a swap file exists.
+        "
+        " Here we want to avoid a prompt when file is opened in another Vim instance.
+        "
+        " For a single file Vim creates separate swap file for each Vim instance
+        " in which it's opened. If crash happens and file recovery is necessary
+        " Vim will offer all of the swap files to be used for recovery.
+        let g:swap_file_message = ''
+        autocmd SwapExists * call <SID>SwapFileHandle()
+        autocmd VimEnter * call timer_start(37, {-> <SID>SwapFileMessage()})
+
         " Strip trailing white space on save for all files.
+        "
         " For only some file types use:
         " autocmd FileType c,cpp,java,php,ruby,python autocmd BufWritePre <buffer>
         "     \ :call <SID>StripTrailingWhitespaces()
