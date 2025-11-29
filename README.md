@@ -26,7 +26,7 @@ On Debian/Ubuntu:
 
 - Easy access of Vim configuration by pressing `<F8>`, and auto config reload on save.
 - Right click context menu in Neovim Qt.
-- Customized `desert` color scheme.
+- Customized `desert` color scheme for Neovim, `unokai` is used for Vim.
 - Copy and paste with `<Ctrl-Insert>` and `<Shift-Insert>` respectively.
 - Show unsaved changes in separate tab with `<F5>`.
 - Custom tab line with numbered tabs for quick access with `Alt-<TAB_NUMBER>`.
