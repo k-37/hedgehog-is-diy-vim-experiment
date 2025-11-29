@@ -304,6 +304,12 @@ if has("autocmd")
         autocmd SwapExists * call <SID>SwapFileHandle()
         autocmd VimEnter * call timer_start(37, {-> <SID>SwapFileMessage()})
 
+        " Automatically recover if the file has a `.sw*` extension,
+        " which is used for swap files.
+        " We can enter swap file directory and recover buffers which weren't backed by a file
+        " when crash happened.
+        autocmd BufRead *.sw* execute 'recover'
+
         " Strip trailing white space on save for all files.
         "
         " For only some file types use:
