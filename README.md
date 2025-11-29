@@ -11,7 +11,7 @@ On Debian/Ubuntu:
     sudo apt-get install neovim-qt fzf ripgrep universal-ctags
 
 > [!NOTE]
-> The project is developed on [Debian 12](https://www.debian.org/), if you use another OS have that in mind if something doesn't work as expected.
+> The project is developed on [Debian 13](https://www.debian.org/), if you use another OS have that in mind if something doesn't work as expected.
 
 # Design goals
 
