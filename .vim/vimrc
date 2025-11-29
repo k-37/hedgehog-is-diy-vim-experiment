@@ -17,35 +17,6 @@ let $VIM_CONFIG_PATH= expand('$HOME') .. '/.vim/vimrc'
 " Functions
 " =========
 
-function <SID>SwapFileHandle() abort
-    " Don't do anything on Windows.
-    if !has('unix')
-        return
-    endif
-
-    " Check if any process has the swap file open.
-    let l:lsof_result = systemlist('lsof ' .. shellescape(v:swapname) .. ' 2>/dev/null')
-
-    if empty(lsof_result)
-        let v:swapchoice = 'r' " recover; swap file isn't in use by another Vim instance.
-    else
-        let v:swapchoice = 'e'
-        let g:swap_file_message = 'This file is also opened for editing in'
-            \ .. ' another Vim instance.'
-    endif
-endfunction
-
-function <SID>SwapFileMessage() abort
-    if empty(g:swap_file_message)
-        return
-    endif
-
-    echohl ModeMsg
-    echom g:swap_file_message
-    echohl None
-    let g:swap_file_message = ''
-endfunction
-
 function <SID>StripTrailingWhitespaces() abort
     let l:l = line(".")
     let l:c = col(".")
@@ -77,6 +48,38 @@ function! SetStatusLine() abort
         return '%3*'.l:statusLine
     endif
     return '%0*'.l:statusLine
+endfunction
+
+" Swap file
+" =========
+
+function <SID>SwapFileHandle() abort
+    " Don't do anything on Windows.
+    if !has('unix')
+        return
+    endif
+
+    " Check if any process has the swap file open.
+    let l:lsof_result = systemlist('lsof ' .. shellescape(v:swapname) .. ' 2>/dev/null')
+
+    if empty(lsof_result)
+        let v:swapchoice = 'r' " recover; swap file isn't in use by another Vim instance.
+    else
+        let v:swapchoice = 'e'
+        let g:swap_file_message = 'This file is also opened for editing in'
+            \ .. ' another Vim instance.'
+    endif
+endfunction
+
+function <SID>SwapFileMessage() abort
+    if empty(g:swap_file_message)
+        return
+    endif
+
+    echohl ModeMsg
+    echom g:swap_file_message
+    echohl None
+    let g:swap_file_message = ''
 endfunction
 
 " Tab Line
@@ -1165,6 +1168,14 @@ runtime ftplugin/man.vim
 " ------------
 
 packadd! matchit
+
+" comment (first party plugin)
+" ============================
+
+" Load plugin.
+" ------------
+
+packadd! comment
 
 " Netrw (first party plugin)
 " ==========================
