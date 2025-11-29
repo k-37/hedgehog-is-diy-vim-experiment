@@ -576,6 +576,9 @@ nnoremap <S-F4> :enew<CR>
 " List buffers which then can be opened with `:b <BUFFER_NUMBER>`.
 nnoremap <Leader>bl :buffers<CR>
 
+" Echo current buffer ID.
+nnoremap <Leader>bi :echo 'Buffer ID: ' .. bufnr("%")<CR>
+
 " Fuzzy find buffers.
 nnoremap <Leader>bf :Buffers<CR>
 
