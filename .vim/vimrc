@@ -27,6 +27,22 @@ function <SID>StripTrailingWhitespaces() abort
     call cursor(l, c)
 endfunction
 
+" Delete hidden saved buffers
+" ===========================
+
+function <SID>DeleteHiddenSavedBuffers() abort
+    let l:tpbl = []
+    let l:deleted_count = 0
+    call map(range(1, tabpagenr('$')), 'extend(tpbl, tabpagebuflist(v:val))')
+    for l:buf in filter(range(1, bufnr('$')), 'bufexists(v:val) && index(tpbl, v:val) == -1')
+        if getbufvar(buf, '&modified') == 0
+            silent execute 'bwipeout' buf
+            let deleted_count += 1
+        endif
+    endfor
+    echo 'Deleted "' .. deleted_count .. '" hidden buffers which are saved.'
+endfunction
+
 " Status Line
 " ===========
 
@@ -610,6 +626,9 @@ nnoremap <C-S-M-h> :bprevious<CR>
 nnoremap <Leader>bn :bnext<CR>
 nnoremap <C-S-M-l> :bnext<CR>
 
+" Delete all hidden buffers which are saved.
+nnoremap <Leader>bxh :call <SID>DeleteHiddenSavedBuffers()<CR>
+
 " Switch to next buffer, unload and delete previous from the buffer list.
 nnoremap <expr> <Leader>bd &modified ? ':echoe "Unwritten!!!"<CR>':':bnext<CR>:bdelete#<CR>'
 nnoremap <expr> <C-S-F4> &modified ? ':echoe "Unwritten!!!"<CR>':':bnext<CR>:bdelete#<CR>'
@@ -699,6 +718,17 @@ nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
 nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
 nnoremap <expr> gj (v:count == 0 ? 'j' : 'gj')
 nnoremap <expr> gk (v:count == 0 ? 'k' : 'gk')
+
+" Remap arrow keys.
+nnoremap <Left> h
+nnoremap <Down> j
+nnoremap <Up> k
+nnoremap <Right> l
+
+vnoremap <Left> h
+vnoremap <Down> j
+vnoremap <Up> k
+vnoremap <Right> l
 
 " Macros
 " ------
