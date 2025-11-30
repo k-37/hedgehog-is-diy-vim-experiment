@@ -8,7 +8,7 @@ This project explores creating [Vim](https://www.vim.org/) configuration with mi
 
 On Debian/Ubuntu:
 
-    sudo apt-get install neovim-qt fzf ripgrep universal-ctags
+    sudo apt-get install vim-gtk3 fzf ripgrep universal-ctags
 
 > [!NOTE]
 > The project is developed on [Debian 13](https://www.debian.org/), if you use another OS have that in mind if something doesn't work as expected.
