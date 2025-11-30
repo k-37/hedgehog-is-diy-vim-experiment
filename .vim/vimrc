@@ -695,10 +695,10 @@ vnoremap <C-M-j> :move '>+1<CR>gv=gv
 vnoremap <C-M-k> :move '<-2<CR>gv=gv
 
 " Move inside of displayed (word wrapped) line.
-nnoremap j gj
-nnoremap k gk
-nnoremap gj j
-nnoremap gk k
+nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
+nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
+nnoremap <expr> gj (v:count == 0 ? 'j' : 'gj')
+nnoremap <expr> gk (v:count == 0 ? 'k' : 'gk')
 
 " Macros
 " ------
