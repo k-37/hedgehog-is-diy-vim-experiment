@@ -17,12 +17,18 @@ let $VIM_CONFIG_PATH= expand('$HOME') .. '/.vim/vimrc'
 " Functions
 " =========
 
+" Strip trailing whitespaces
+" ==========================
+
 function <SID>StripTrailingWhitespaces() abort
     let l:l = line(".")
     let l:c = col(".")
     keepp %s/\s\+$//e
     call cursor(l, c)
 endfunction
+
+" Status Line
+" ===========
 
 function! SetStatusLine() abort
     let l:statusLine = ''
@@ -48,38 +54,6 @@ function! SetStatusLine() abort
         return '%3*'.l:statusLine
     endif
     return '%0*'.l:statusLine
-endfunction
-
-" Swap file
-" =========
-
-function <SID>SwapFileHandle() abort
-    " Don't do anything on Windows.
-    if !has('unix')
-        return
-    endif
-
-    " Check if any process has the swap file open.
-    let l:lsof_result = systemlist('lsof ' .. shellescape(v:swapname) .. ' 2>/dev/null')
-
-    if empty(lsof_result)
-        let v:swapchoice = 'r' " recover; swap file isn't in use by another Vim instance.
-    else
-        let v:swapchoice = 'e'
-        let g:swap_file_message = 'This file is also opened for editing in'
-            \ .. ' another Vim instance.'
-    endif
-endfunction
-
-function <SID>SwapFileMessage() abort
-    if empty(g:swap_file_message)
-        return
-    endif
-
-    echohl ModeMsg
-    echom g:swap_file_message
-    echohl None
-    let g:swap_file_message = ''
 endfunction
 
 " Tab Line
@@ -149,6 +123,38 @@ function! SetTabLabel(n, tabLabelSize)
     endif
 
     return l:tabLabel
+endfunction
+
+" Swap file
+" =========
+
+function <SID>SwapFileHandle() abort
+    " Don't do anything on Windows.
+    if !has('unix')
+        return
+    endif
+
+    " Check if any process has the swap file open.
+    let l:lsof_result = systemlist('lsof ' .. shellescape(v:swapname) .. ' 2>/dev/null')
+
+    if empty(lsof_result)
+        let v:swapchoice = 'r' " recover; swap file isn't in use by another Vim instance.
+    else
+        let v:swapchoice = 'e'
+        let g:swap_file_message = 'This file is also opened for editing in'
+            \ .. ' another Vim instance.'
+    endif
+endfunction
+
+function <SID>SwapFileMessage() abort
+    if empty(g:swap_file_message)
+        return
+    endif
+
+    echohl ModeMsg
+    echom g:swap_file_message
+    echohl None
+    let g:swap_file_message = ''
 endfunction
 
 " Paste
@@ -1153,35 +1159,16 @@ set viminfofile=NONE
 " Plugins
 " =======
 
-" man.vim (first party plugin)
-" ============================
-
-" Load plugin.
-" ------------
+" First party plugins (built-in)
+" ==============================
 
 runtime ftplugin/man.vim
-
-" matchit (first party plugin)
-" ============================
-
-" Load plugin.
-" ------------
-
 packadd! matchit
-
-" comment (first party plugin)
-" ============================
-
-" Load plugin.
-" ------------
-
 packadd! comment
+packadd! hlyank
 
-" Netrw (first party plugin)
-" ==========================
-
-" Configuration
-" -------------
+" Netrw
+" -----
 
 " Size of the new windows (in %) when Netrw creates a split with `v` or `o`.
 let g:netrw_winsize = 75
@@ -1194,16 +1181,16 @@ let g:netrw_banner = 0 " To show banner temporarily use `I` inside Netrw.
 
 let g:netrw_sort_options='i' " Case insensitive sort.
 
-" FZF.vim (part of `fzf` binary package), NOT same as https://github.com/junegunn/fzf.vim
-" =======================================================================================
+" Third party plugins
+" ===================
+
+" FZF.vim (part of `fzf` binary package), NOT the same as https://github.com/junegunn/fzf.vim
+" -------------------------------------------------------------------------------------------
+
+" Documentation: https://github.com/junegunn/fzf/blob/master/README-VIM.md
 
 if filereadable('/usr/share/doc/fzf/examples/plugin/fzf.vim')
     source /usr/share/doc/fzf/examples/plugin/fzf.vim
 endif
-
-" Configuration
-" -------------
-
-" Documentation: https://github.com/junegunn/fzf/blob/master/README-VIM.md
 
 " let g:fzf_layout = { 'left': '~50%' }
