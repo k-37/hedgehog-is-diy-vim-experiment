@@ -475,6 +475,10 @@ if has('gui_running') && !has('nvim')
         set guifont=Consolas:h16
     elseif has('gui_macvim')
         set guifont=Monaco:h22
+
+        " If Hack font is installed with the command: brew install --cask font-hack
+        " It will be used if the following line is uncommented.
+        " set guifont=Hack:h22
     endif
 
     set guioptions-=e " Hide tab line.
@@ -564,27 +568,50 @@ nnoremap <Leader>mm :MakeTags<CR>
 " ---------
 
 " Copy.
-nnoremap <C-Insert> "+y
-vnoremap <C-Insert> "+y
+if has('gui_macvim')
+    nnoremap <C-Help> "+y
+    vnoremap <C-Help> "+y
+else
+    nnoremap <C-Insert> "+y
+    vnoremap <C-Insert> "+y
+endif
 
 " Paste.
-vnoremap <S-Insert> "+p
+if has('gui_macvim')
+    vnoremap <S-Help> "+p
+else
+    vnoremap <S-Insert> "+p
+endif
 
 " It is not possible to paste before last character,
 " in Normal mode use `"+p` or `"+P` to do that.
-nnoremap <S-Insert> :call <SID>PasteInNormalMode()<CR>
+if has('gui_macvim')
+    nnoremap <S-Help> :call <SID>PasteInNormalMode()<CR>
+else
+    nnoremap <S-Insert> :call <SID>PasteInNormalMode()<CR>
+endif
 
 " We use `<C-R>` and call the function to get Insert mode cursor position
 " without switching to Normal mode, see `:help i_CTRL-R`.
-inoremap <S-Insert> <C-R>=<SID>PasteInInsertMode()<CR>
+if has('gui_macvim')
+    inoremap <S-Help> <C-R>=<SID>PasteInInsertMode()<CR>
+else
+    inoremap <S-Insert> <C-R>=<SID>PasteInInsertMode()<CR>
+endif
 
 " Paste clipboard register to command line.
-cnoremap <S-Insert> <C-R>+
+if has('gui_macvim')
+    cnoremap <S-Help> <C-R>+
+else
+    cnoremap <S-Insert> <C-R>+
+endif
 
 " Paste to terminal window like one used by `fzf`.
 if has('nvim')
     " `<C-\><C-N>` enters Normal mode in terminal.
     tnoremap <expr> <S-Insert> '<C-\><C-N>pi'
+elseif has('gui_macvim')
+    tnoremap <S-Help> <C-w>"+
 else
     tnoremap <S-Insert> <C-w>"+
 endif
@@ -1221,6 +1248,8 @@ let g:netrw_sort_options='i' " Case insensitive sort.
 
 if filereadable('/usr/share/doc/fzf/examples/plugin/fzf.vim')
     source /usr/share/doc/fzf/examples/plugin/fzf.vim
+elseif filereadable('/opt/homebrew/opt/fzf/plugin/fzf.vim')
+    source /opt/homebrew/opt/fzf/plugin/fzf.vim
 endif
 
 " let g:fzf_layout = { 'left': '~50%' }
