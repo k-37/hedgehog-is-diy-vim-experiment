@@ -34,6 +34,8 @@ function <SID>DiffCurrentWithBufferById() abort
     let l:buffer_id = input('Diff the current buffer with buffer ID: ')
     redraw " Clears the command line.
 
+    if buffer_id == '' | echo '' | return | endif
+
     if buffer_id !~ '^\d\+$'
         echohl ErrorMsg
         echom 'Invalid buffer ID: ' .. buffer_id
@@ -546,14 +548,14 @@ syntax on " Switch syntax highlighting on.
 " i.e. it shows unsaved changes, see `:h :DiffOrig`.
 " It opens a new tab and moves it before the origin one.
 " Closing the tab with the diff will return focus to the origin tab.
-command! DiffOrig tabnew % | aboveleft vnew | set buftype=nofile
-    \ | read ++edit # | 0d_ | diffthis | wincmd p | diffthis | -tabmove
+command! DiffOrig tabnew % | -tabmove | aboveleft vnew | set buftype=nofile
+    \ | read ++edit # | 0d_ | diffthis | wincmd p | diffthis
 
 " Shows differences between the current buffer and a buffer identified by its buffer ID.
 " It opens a new tab and moves it before the origin one.
 " Closing the tab with the diff will return focus to the origin tab.
-command! -nargs=1 DiffBuffById tabnew | buffer # | belowright vnew | set buftype=nofile
-    \ | execute 'buffer ' .. <args> | diffthis | wincmd p | diffthis | -tabmove
+command! -nargs=1 DiffBuffById tabnew | buffer # | -tabmove | belowright vnew
+    \ | execute 'buffer ' .. <args> | diffthis | wincmd p | diffthis
 
 " Executes system `ctags` command which recursively generates tags from current directory.
 " Sending `stdout` and `stderr` to `/dev/null` prevents output from appearing in the buffer
