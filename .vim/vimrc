@@ -17,14 +17,39 @@ let $VIM_CONFIG_PATH= expand('$HOME') .. '/.vim/vimrc'
 " Functions
 " =========
 
-" Strip trailing whitespaces
-" ==========================
+" Strip trailing white spaces
+" ===========================
 
 function <SID>StripTrailingWhitespaces() abort
     let l:l = line(".")
     let l:c = col(".")
     keepp %s/\s\+$//e
     call cursor(l, c)
+endfunction
+
+" Diff the current buffer with a buffer ID entered on a prompt
+" ============================================================
+
+function <SID>DiffCurrentWithBufferById() abort
+    let l:buffer_id = input('Diff the current buffer with buffer ID: ')
+    redraw " Clears the command line.
+
+    if buffer_id !~ '^\d\+$'
+        echo 'Invalid buffer ID: ' .. buffer_id
+        return
+    endif
+
+    let buffer_id = str2nr(buffer_id)
+
+    if !bufexists(buffer_id)
+        echo 'Buffer ID does not exist: ' .. buffer_id
+        return
+    elseif buffer_id == bufnr('%')
+        echo 'Trying to compare the same buffer ID: ' .. buffer_id
+        return
+    endif
+
+    execute 'DiffBuffById ' .. buffer_id
 endfunction
 
 " Delete hidden saved buffers
@@ -513,8 +538,16 @@ syntax on " Switch syntax highlighting on.
 
 " Shows differences between the current buffer and the file it was loaded from,
 " i.e. it shows unsaved changes, see `:h :DiffOrig`.
-command! DiffOrig aboveleft vnew | set buftype=nofile | read ++edit #
-    \ | 0d_ | diffthis | wincmd p | diffthis
+" It opens a new tab and moves it before the origin one.
+" Closing the tab with the diff will return focus to the origin tab.
+command! DiffOrig tabnew % | aboveleft vnew | set buftype=nofile
+    \ | read ++edit # | 0d_ | diffthis | wincmd p | diffthis | -tabmove
+
+" Shows differences between the current buffer and a buffer identified by its buffer ID.
+" It opens a new tab and moves it before the origin one.
+" Closing the tab with the diff will return focus to the origin tab.
+command! -nargs=1 DiffBuffById tabnew | buffer # | belowright vnew | set buftype=nofile
+    \ | execute 'buffer ' .. <args> | diffthis | wincmd p | diffthis | -tabmove
 
 " Executes system `ctags` command which recursively generates tags from current directory.
 " Sending `stdout` and `stderr` to `/dev/null` prevents output from appearing in the buffer
@@ -554,12 +587,17 @@ command! -range=% -nargs=0 -bar Shuffle :silent!
 let mapleader="\<Space>"
 let maplocalleader=','
 
-" Custom
-" ------
+" Custom commands
+" ---------------
 
-" Show unsaved changes in new tab and move the tab before the origin one.
-" Closing tab with diff will return focus to origin tab.
-nnoremap <F5> :tabnew %<CR>:DiffOrig<CR>:-tabmove<CR>
+" Show unsaved changes in a new tab and move the tab before the origin one.
+" Closing tab with the diff will return focus to the origin tab.
+nnoremap <F5> :DiffOrig<CR>
+
+" Diff the current buffer with the buffer ID which is entered on a prompt.
+" Diff is opened in a new tab and moved before the origin one.
+" Closing tab with the diff will return focus to origin tab.
+nnoremap <C-F5> :call <SID>DiffCurrentWithBufferById()<CR>
 
 " Create tags.
 nnoremap <Leader>mm :MakeTags<CR>
@@ -1222,7 +1260,6 @@ set viminfofile=NONE
 runtime ftplugin/man.vim
 packadd! matchit
 packadd! comment
-packadd! hlyank
 
 " Netrw
 " -----
