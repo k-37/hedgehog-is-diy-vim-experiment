@@ -35,17 +35,23 @@ function <SID>DiffCurrentWithBufferById() abort
     redraw " Clears the command line.
 
     if buffer_id !~ '^\d\+$'
-        echo 'Invalid buffer ID: ' .. buffer_id
+        echohl ErrorMsg
+        echom 'Invalid buffer ID: ' .. buffer_id
+        echohl None
         return
     endif
 
     let buffer_id = str2nr(buffer_id)
 
     if !bufexists(buffer_id)
-        echo 'Buffer ID does not exist: ' .. buffer_id
+        echohl ErrorMsg
+        echom 'Buffer ID does not exist: ' .. buffer_id
+        echohl None
         return
     elseif buffer_id == bufnr('%')
-        echo 'Trying to compare the same buffer ID: ' .. buffer_id
+        echohl ErrorMsg
+        echom 'Trying to compare the same buffer ID: ' .. buffer_id
+        echohl None
         return
     endif
 
@@ -192,7 +198,7 @@ function <SID>SwapFileMessage() abort
         return
     endif
 
-    echohl ModeMsg
+    echohl MoreMsg
     echom g:swap_file_message
     echohl None
     let g:swap_file_message = ''
