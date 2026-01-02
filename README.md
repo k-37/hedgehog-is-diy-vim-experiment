@@ -27,13 +27,14 @@ On Debian/Ubuntu:
 - Easy access of Vim configuration by pressing `<F8>`, and auto config reload on save.
 - Right click context menu in Neovim Qt.
 - Customized `desert` color scheme for Neovim, `unokai` is used for Vim.
-- Copy and paste with `<Ctrl-Insert>` and `<Shift-Insert>` respectively.
+- Copy with `<Ctrl-Insert>`, and paste with `<Shift-Insert>`.
 - Show unsaved changes in separate tab with `<F5>`.
 - Custom tab line with numbered tabs for quick access with `Alt-<TAB_NUMBER>`.
 - Custom status line.
-- Automatic handling of swap files, i.e. no prompts when single file is opened in multiple instances.
-- Use `-` to open directory browser and, `hjkl` to traverse file system.
+- Automatic handling of swap files, i.e. no prompts when single file is opened in multiple Vim instances.
+- Use `-` to open directory browser, and `hjkl` to traverse file system.
 - Fuzzy find files with `<Space>ff`, find string in files with `<Space>fs`.
+- Find and replace in files with `<Space>fa`, find and replace in open buffers with `<Space>ba`.
 
 Explore [`.vim/vimrc`](.vim/vimrc) to find out more. 🦔
 

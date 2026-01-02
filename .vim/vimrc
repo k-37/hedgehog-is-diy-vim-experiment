@@ -326,6 +326,175 @@ function! s:RgHandler(lines) abort
     endfor
 endfunction
 
+" Find and replace
+" ================
+
+" Find and replace in files
+" -------------------------
+
+if !exists('s:find_and_replace_in_files_last_find')
+    let s:find_and_replace_in_files_last_find = ''
+endif
+if !exists('s:find_and_replace_in_files_last_replace')
+    let s:find_and_replace_in_files_last_replace = ''
+endif
+if !exists('find_and_replace_in_files_last_where')
+    let s:find_and_replace_in_files_last_where = "--glob '*'"
+endif
+
+function <SID>FindAndReplaceInFiles() abort
+    if !empty(filter(
+        \ range(1, bufnr('$')),
+        \ 'bufname(v:val) != "" && getbufvar(v:val, "&modified")'
+            \ .. ' && getbufvar(v:val, "&buftype") == ""'
+    \ ))
+        echohl ErrorMsg
+        echom 'Save all file-backed buffers before doing find and replace in files.'
+        echohl None
+        return
+    endif
+
+    let l:find = input(
+        \ 'In "' .. getcwd() .. '" find string to replace: ',
+        \ s:find_and_replace_in_files_last_find
+    \ )
+    redraw " Clears the command line.
+    if l:find == '' | echo '' | return | endif
+    let s:find_and_replace_in_files_last_find = l:find
+
+    let l:replace = input(
+        \ 'Replace "' .. l:find .. '" with: ',
+        \ s:find_and_replace_in_files_last_replace
+    \ )
+    let s:find_and_replace_in_files_last_replace = l:replace
+
+    let l:where = input(
+        \ 'In "' .. getcwd() .. '" where to replace: ',
+        \ s:find_and_replace_in_files_last_where
+    \ )
+    redraw " Clears the command line.
+    if l:where == '' | echo '' | return | endif
+    let s:find_and_replace_in_files_last_where = l:where
+
+    " Populate quickfix list with grep results.
+    execute 'silent grep! ' .. l:find .. ' ' .. l:where
+
+    " Check if there are valid results in quickfix list.
+    if empty(filter(getqflist(), {_, v -> v.bufnr > 0}))
+        call setqflist([])
+    endif
+    call s:DoReplacementFromQuickfixEntries(l:find, l:replace)
+endfunction
+
+function <SID>DoReplacementFromQuickfixEntries(find, replace) abort
+    " Close the quickfix window.
+    execute 'cclose'
+
+    if empty(getqflist()) | echo 'No results found.' | return | endif
+
+    let l:confirm = input('Confirm replacements (yes | no): ', 'yes')
+    redraw " Clears the command line.
+    if (l:confirm != 'yes' && l:confirm != 'no')
+        echohl ErrorMsg
+        echo '"' .. l:confirm .. '" is not valid input as replacement confirmation.'
+        echohl None
+        return
+    endif
+
+    " Open the quickfix window.
+    execute 'cwindow'
+
+    " If replacement confirmation is used,
+    " with `Ctrl-C` interrupt all subsequent confirmation prompts.
+    try
+        " Do the replacement from all quickfix entries.
+        execute 'cdo s/' .. a:find .. '/' .. a:replace .. '/'
+            \ .. ( l:confirm == 'yes' ? 'c' : '' )
+
+        " Open every file referenced in the quickfix list in its own tab.
+        execute 'set switchbuf+=usetab,newtab'
+        execute 'silent cfdo tab sbuffer'
+        execute 'set switchbuf-=usetab,newtab'
+    catch /^Vim:Interrupt$/
+        echohl ErrorMsg
+        echo 'Replacement is interrupted.'
+        echohl None
+    endtry
+endfunction
+
+" Find and replace in buffers
+" ---------------------------
+
+if !exists('s:find_and_replace_in_buffers_last_find')
+    let s:find_and_replace_in_buffers_last_find = ''
+endif
+if !exists('s:find_and_replace_in_buffers_last_replace')
+    let s:find_and_replace_in_buffers_last_replace = ''
+endif
+
+function <SID>FindAndReplaceInBuffers() abort
+    let l:find = input(
+        \ 'In open buffers find string to replace: ',
+        \ s:find_and_replace_in_buffers_last_find
+    \ )
+    redraw " Clears the command line.
+    if l:find == '' | echo '' | return | endif
+    let s:find_and_replace_in_buffers_last_find = l:find
+
+    let l:replace = input(
+        \ 'Replace "' .. l:find .. '" with: ',
+        \ s:find_and_replace_in_buffers_last_replace
+    \ )
+    redraw " Clears the command line.
+    let s:find_and_replace_in_buffers_last_replace = l:replace
+
+    " Clear quickfix list.
+    call setqflist([])
+
+    " `:grep` can only be used on files.
+    " For buffers we use custom function to populate quickfix list,
+    " similar to how `:grep` does it.
+    bufdo call <SID>AddQuickfixListEntriesFromBuffer(l:find)
+
+    call <SID>DoReplacementFromQuickfixEntries(l:find, l:replace)
+endfunction
+
+function! s:AddQuickfixListEntriesFromBuffer(pattern) abort
+    " Skip if the buffer is the special one, e.g., `help`, `quickfix`, etc.
+    if (&buftype != '') | return | endif
+
+    let l:lines = getbufline(bufnr('%'), 1, '$')
+    let l:lnum = 1
+
+    for l:line in l:lines
+        let l:start = 0
+
+        while v:true
+            silent! let l:m = matchstrpos(l:line, a:pattern, l:start)
+
+            " `m[0]` is the matched string returned by `matchstrpos()`.
+            " `m[1]` is the start column.
+            " `m[2]` is the end column.
+            if l:m[1] == -1
+                break
+            endif
+
+            call setqflist([{
+                \ 'bufnr': bufnr('%'),
+                \ 'lnum': l:lnum,
+                \ 'col': l:m[1] + 1,
+                \ 'text': l:line
+            \ }], 'a')
+
+            " `l:start + 1` is needed to avoid infinite loop if match is zero-length,
+            " e.g., a pattern like `\zs` or `\ze`.
+            let l:start = (l:m[2] > l:start ? l:m[2] : l:start + 1)
+        endwhile
+
+        let l:lnum += 1
+    endfor
+endfunction
+
 " ============
 " Autocommands
 " ============
@@ -677,8 +846,18 @@ nnoremap <Leader>fx :find *
 " Find string in files. After entering pattern hit enter.
 nnoremap <Leader>fs :Rg<Space>
 
+" Find and replace (alter) string in files.
+" Input parameters on prompts. If replacement confirmation is used,
+" with `Ctrl-C` interrupt all subsequent confirmation prompts.
+nnoremap <Leader>fa :call <SID>FindAndReplaceInFiles()<CR>
+
 " Buffers
 " -------
+
+" Find and replace (alter) string in buffers.
+" Input parameters on prompts. If replacement confirmation is used,
+" with `Ctrl-C` interrupt all subsequent confirmation prompts.
+nnoremap <Leader>ba :call <SID>FindAndReplaceInBuffers()<CR>
 
 " Edit a new, unnamed buffer.
 nnoremap <S-F4> :enew<CR>
