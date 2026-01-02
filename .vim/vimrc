@@ -992,14 +992,15 @@ nnoremap Q @q
 " Apply macro to visual selection.
 vnoremap <F4> :normal! @q<CR>
 
-" Search and replace
-" ------------------
+" Search and replace within current buffer
+" ----------------------------------------
 
 " Search selection as literal.
 " `\V` activates "very nomagic" mode (`:h /\V`),
 " but we still need to escape `\` and `/` characters, which are not literals with `\V`.
-" `<C-R>` inserts contents of the `"` register which was filled with yank `y`.
-vnoremap <F3> y<BS>/\V<C-R>=escape(@",'/\')<CR><CR>
+" `<C-R>=escape(@A,'/\')` inserts escaped contents of the `A` register,
+" which was filled with yank `"ay`.
+vnoremap <F3> "ay<BS>/\V<C-R>=escape(@A,'/\')<CR><CR>
 
 " Move cursor on top of a word or select some text, press defined combination, type changes,
 " exit Insert mode. Now press `.` to repeat changes to the next match, or
@@ -1014,12 +1015,14 @@ xnoremap <M-F2> "sy:let @/=@s<CR>cgn
 " Search and replace selection below cursor, `:help :s`.
 " `.,$s` is range setting.
 " `I` is for case sensitive, replace it with `i` for case insensitive.
-vnoremap <F2> y<BS>:.,$s;<C-R>";<C-R>";gcI<Left><Left><Left><Left>
+" `<C-R>A` inserts contents of the `A` register which was filled with yank `"ay`.
+vnoremap <F2> "ay<BS>:.,$s;<C-R>A;<C-R>A;gcI<Left><Left><Left><Left>
 
 " Search and replace selection in whole file.
 " `%s` is range setting.
 " `I` is for case sensitive, replace it with `i` for case insensitive.
-vnoremap <S-F2> y<BS>:%s;<C-R>";<C-R>";gcI<Left><Left><Left><Left>
+" `<C-R>A` inserts contents of the `A` register which was filled with yank `"ay`.
+vnoremap <S-F2> "ay<BS>:%s;<C-R>A;<C-R>A;gcI<Left><Left><Left><Left>
 
 " Sort
 " ----
