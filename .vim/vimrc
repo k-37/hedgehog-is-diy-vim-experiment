@@ -1173,6 +1173,10 @@ nnoremap <Leader>mh :noh<CR>
 " Toggle spell checking (modify spell checking).
 nnoremap <Leader>ms :set spell!<CR>
 
+" Modify current buffer's filetype to use, for example, different syntax highlighting.
+" Use tab to get complete list of supported values.
+nnoremap <Leader>mt :set filetype=
+
 nnoremap <F8> :edit $VIM_CONFIG_PATH<CR>
 
 " Indent.
