@@ -206,6 +206,68 @@ function <SID>SwapFileMessage() abort
     let g:swap_file_message = ''
 endfunction
 
+" Yank
+" ====
+
+function <SID>YankAllLinesContainingMatchOfLastUsedSearchPattern() abort
+    " Clear register `a`.
+    let @a = ''
+
+    " Append lines containing match of last used search pattern to register `A`.
+    execute 'g##y A'
+
+    " Set the system clipboard to the contents of register `a`.
+    let @+ = @a
+endfunction
+
+function <SID>YankMatchesOfLastUsedSearchPattern() abort
+    if empty(@/)
+        echohl ErrorMsg
+        echo "No search pattern set."
+        echohl None
+
+        return
+    endif
+
+    let l:matches = []
+
+    " Iterate over the lines in the entire file.
+    for l:line in range(1, line('$'))
+        let l:txt = getline(l:line)
+        let l:start = match(l:txt, @/)
+
+        while l:start >= 0
+            let l:end = matchend(l:txt, @/, l:start)
+
+            if l:end > l:start
+                call add(l:matches, strpart(l:txt, l:start, l:end - l:start))
+            else
+                " This is used to handle searches with a pattern like `.\{-}\ze,`
+                " which matches characters (as few as possible) up to,
+                " but not including, a comma.
+                " It's necessary to increment `l:end` to get past the comma.
+                let l:end += 1
+            endif
+
+            if @/[0] == '^'
+                break " To avoid false matches.
+            endif
+
+            let l:start = match(l:txt, @/, l:end)
+        endwhile
+    endfor
+
+    if len(l:matches) > 0
+        let l:line_separator = ( &fileformat == 'dos' ) ? "\r\n" : "\n"
+        let @+ = join(l:matches, l:line_separator) .. l:line_separator
+        echo len(l:matches) .. " matches copied to clipboard."
+    else
+        echohl ErrorMsg
+        echo "No matches found."
+        echohl None
+    endif
+endfunction
+
 " Paste
 " =====
 
@@ -781,6 +843,12 @@ nnoremap <Leader>mm :MakeTags<CR>
 
 " Clipboard
 " ---------
+
+" Yank all lines containing match of last used search pattern.
+nnoremap <Leader>yl :call <SID>YankAllLinesContainingMatchOfLastUsedSearchPattern()<CR>
+
+" Yank matches of last used search pattern.
+nnoremap <Leader>ym :call <SID>YankMatchesOfLastUsedSearchPattern()<CR>
 
 " Copy.
 if has('gui_macvim')

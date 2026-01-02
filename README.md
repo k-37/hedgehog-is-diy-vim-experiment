@@ -31,8 +31,9 @@ On Debian/Ubuntu:
 - Show unsaved changes in separate tab with `<F5>`.
 - Custom tab line with numbered tabs for quick access with `Alt-<TAB_NUMBER>`.
 - Custom status line.
-- Automatic handling of swap files, i.e. no prompts when single file is opened in multiple Vim instances.
+- Automatic handling of swap files, i.e. no prompts when single file is opened in multiple Vim instances. Swap files are still used to prevent data loss.
 - Use `-` to open directory browser, and `hjkl` to traverse file system.
+- Copy to clipboard all lines containing match of last used search pattern with `<Space>yl`, copy only matches of last used search pattern with `<Space>ym`.
 - Fuzzy find files with `<Space>ff`, find string in files with `<Space>fs`.
 - Find and replace in files with `<Space>fa`, find and replace in open buffers with `<Space>ba`.
 
