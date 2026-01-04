@@ -1041,13 +1041,13 @@ nnoremap <expr> gk (v:count == 0 ? 'k' : 'gk')
 
 " Remap arrow keys.
 nnoremap <Left> h
-nnoremap <Down> j
-nnoremap <Up> k
+nnoremap <expr> <Down> v:count == 0 ? 'gj' : 'j'
+nnoremap <expr> <Up> v:count == 0 ? 'gk' : 'k'
 nnoremap <Right> l
 
 vnoremap <Left> h
-vnoremap <Down> j
-vnoremap <Up> k
+vnoremap <expr> <Down> v:count == 0 ? 'gj' : 'j'
+vnoremap <expr> <Up> v:count == 0 ? 'gk' : 'k'
 vnoremap <Right> l
 
 " Macros
