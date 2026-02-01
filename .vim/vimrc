@@ -1208,6 +1208,14 @@ nmap <Leader>cb64e :%!base64<CR>
 " Decode current buffer's contents from base64 string.
 nmap <Leader>cb64d :%!base64 --decode<CR>
 
+" Encode current buffer's contents as hex string (e.g. from `1337` to `31333337`).
+nmap <Leader>che :%!cat <Bar> od -An -tx1 -v <Bar> tr -d '[:space:]' <Bar> sed 's/0a$//'<CR>
+
+" Decode current buffer's contents from hex string (e.g. from `31333337` to `1337`).
+nmap <Leader>chd :%!tr -d '[:space:]' <Bar>
+    \ sed 's/../\\x&/g' <Bar>
+    \ { IFS= read -r st; printf '\%b\n' "$st"; }<CR>
+
 " External applications
 " ---------------------
 
