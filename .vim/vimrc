@@ -1064,11 +1064,17 @@ vnoremap <F4> :normal! @q<CR>
 " ----------------------------------------
 
 " Search selection as literal.
+" `<silent>` suppresses "Press ENTER or type command to continue" prompt
+" for long search commands (`:h <silent>`), by not echoing on the command line.
 " `\V` activates "very nomagic" mode (`:h /\V`),
 " but we still need to escape `\` and `/` characters, which are not literals with `\V`.
 " `<C-R>=escape(@A,'/\')` inserts escaped contents of the `A` register,
 " which was filled with yank `"ay`.
-vnoremap <F3> "ay<BS>/\V<C-R>=escape(@A,'/\')<CR><CR>
+" `N` returns cursor position to yanked text.
+vnoremap <silent> <F3> "ay/\V<C-R>=escape(@A,'/\')<CR><CR>N
+
+" Search with clipboard register contents as literal.
+nnoremap <silent> <M-F3> /\V<C-R>=escape(@+,'/\')<CR><CR>
 
 " Move cursor on top of a word or select some text, press defined combination, type changes,
 " exit Insert mode. Now press `.` to repeat changes to the next match, or
@@ -1084,13 +1090,13 @@ xnoremap <M-F2> "sy:let @/=@s<CR>cgn
 " `.,$s` is range setting.
 " `I` is for case sensitive, replace it with `i` for case insensitive.
 " `<C-R>A` inserts contents of the `A` register which was filled with yank `"ay`.
-vnoremap <F2> "ay<BS>:.,$s;<C-R>A;<C-R>A;gcI<Left><Left><Left><Left>
+vnoremap <F2> "ay:.,$s;<C-R>A;<C-R>A;gcI<Left><Left><Left><Left>
 
 " Search and replace selection in whole file.
 " `%s` is range setting.
 " `I` is for case sensitive, replace it with `i` for case insensitive.
 " `<C-R>A` inserts contents of the `A` register which was filled with yank `"ay`.
-vnoremap <S-F2> "ay<BS>:%s;<C-R>A;<C-R>A;gcI<Left><Left><Left><Left>
+vnoremap <S-F2> "ay:%s;<C-R>A;<C-R>A;gcI<Left><Left><Left><Left>
 
 " Sort
 " ----
@@ -1282,6 +1288,10 @@ set incsearch " Show match for partly typed search command.
 set ignorecase " Ignore case when using a search pattern.
 
 set smartcase " Override `ignorecase` when pattern has upper case characters.
+
+if exists('+maxsearchcount')
+    set maxsearchcount=9999 " Maximum number for the search count feature.
+endif
 
 " 3. tags
 " -------
