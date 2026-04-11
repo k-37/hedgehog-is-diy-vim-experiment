@@ -844,6 +844,11 @@ nnoremap <Leader>mm :MakeTags<CR>
 " Clipboard
 " ---------
 
+" Yank the current file's name, relative (from current working directory) and absolute path.
+nnoremap <Leader>yn :let @+ = expand('%:t')<CR>
+nnoremap <Leader>yr :let @+ = fnamemodify(expand('%'), ':.')<CR>
+nnoremap <Leader>yp :let @+ = expand('%:p')<CR>
+
 " Yank all lines containing match of last used search pattern.
 nnoremap <Leader>yl :call <SID>YankAllLinesContainingMatchOfLastUsedSearchPattern()<CR>
 
@@ -1456,6 +1461,12 @@ set nocindent " Disable automatic C program indenting.
 
 " Round to `shiftwidth` for `<<` and `>>`. When at 3 spaces, and `>` is hit go to 4, not 7.
 set shiftround
+
+" 17. diff mode
+" -------------
+
+" Options for using diff mode.
+set diffopt+=followwrap
 
 " 18. mapping
 " -----------
